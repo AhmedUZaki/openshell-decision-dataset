@@ -1,0 +1,190 @@
+{
+  "$comment": "One Single-Action Policy Test execution. Checked by safety-router-dataset/create-dataset/schema-validate.mjs plus the cross-field rules in validate-single-action-policy-tests.mjs. Every enum lists individual values; a `null` inside an enum is the JSON null, never a string. The record has no policy version, no confidence level and no verified flag.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_type", "task", "applied_policy", "timestamps", "agent_timeline", "openshell_timeline", "action_and_policy_events", "outcomes", "evaluation_metadata", "execution_checks", "routing", "identifiers", "integrity"],
+  "properties": {
+    "record_type": { "const": "single_action_policy_test_record" },
+    "task": {
+      "type": "object", "additionalProperties": false,
+      "required": ["task_id", "task_text", "task_hash", "task_category"],
+      "properties": {
+        "task_id": { "type": ["string", "null"] },
+        "task_text": { "type": ["string", "null"] },
+        "task_hash": { "type": ["string", "null"] },
+        "task_category": { "type": ["string", "null"] }
+      }
+    },
+    "applied_policy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["policy_profile", "policy_snapshot", "policy_hash", "policy_remained_unchanged"],
+      "properties": {
+        "policy_profile": { "type": ["string", "null"] },
+        "policy_snapshot": { "type": "object" },
+        "policy_hash": { "type": ["string", "null"] },
+        "policy_remained_unchanged": { "type": "boolean" }
+      }
+    },
+    "timestamps": {
+      "type": "object", "additionalProperties": false,
+      "required": ["conversation_created", "sandbox_created", "sandbox_ready", "task_dispatched", "tool_call_requested", "tool_call_started", "tool_call_completed", "tool_result_recorded", "final_agent_response", "agent_run_ended", "execution_boundary_start", "execution_boundary_end", "evidence_saved", "policy_snapshot_created", "policy_snapshot_loaded", "timeline_sources"],
+      "properties": {
+        "conversation_created": { "$ref": "#/stamp" }, "sandbox_created": { "$ref": "#/stamp" }, "sandbox_ready": { "$ref": "#/stamp" }, "task_dispatched": { "$ref": "#/stamp" },
+        "tool_call_requested": { "$ref": "#/stamp" }, "tool_call_started": { "$ref": "#/stamp" }, "tool_call_completed": { "$ref": "#/stamp" }, "tool_result_recorded": { "$ref": "#/stamp" },
+        "final_agent_response": { "$ref": "#/stamp" }, "agent_run_ended": { "$ref": "#/stamp" }, "execution_boundary_start": { "$ref": "#/stamp" }, "execution_boundary_end": { "$ref": "#/stamp" },
+        "evidence_saved": { "$ref": "#/stamp" }, "policy_snapshot_created": { "$ref": "#/stamp" }, "policy_snapshot_loaded": { "$ref": "#/stamp" },
+        "timeline_sources": { "type": "object", "additionalProperties": false, "required": ["agent_timeline", "openshell_timeline"], "properties": { "agent_timeline": { "type": "string" }, "openshell_timeline": { "type": "string" } } }
+      }
+    },
+    "agent_timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sequence", "timestamp_utc", "event_type"],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1 },
+          "timestamp_utc": { "type": ["string", "null"] },
+          "event_type": { "enum": ["task_received", "runtime_message", "assistant_message", "tool_call_started", "tool_call_finished", "final_agent_response", "agent_run_ended"] },
+          "content": { "type": ["string", "null"] },
+          "stop_reason": { "type": ["string", "null"] },
+          "tool_call_id": { "type": ["string", "null"] },
+          "tool_name": { "type": ["string", "null"] },
+          "arguments": {},
+          "tool_result": { "type": "object", "required": ["text", "is_error"], "properties": { "text": { "type": ["string", "null"] }, "is_error": { "type": ["boolean", "null"] } }, "additionalProperties": false },
+          "tool_execution_status": { "enum": ["Succeeded", "Failed", "Unknown"] },
+          "agent_run_status": { "type": ["string", "null"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "openshell_timeline": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["sequence", "timestamp_utc", "source_timestamp", "raw_event_reference", "event_type", "decision", "reason", "matched_rule", "event_origin", "destination", "http_method", "http_path"],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1 },
+          "timestamp_utc": { "type": ["string", "null"] },
+          "source_timestamp": { "type": ["string", "null"] },
+          "raw_event_reference": { "type": "string", "minLength": 1 },
+          "event_type": { "type": ["string", "null"] },
+          "decision": { "enum": [null, "ALLOW", "DENY"] },
+          "reason": { "type": ["string", "null"] },
+          "matched_rule": { "type": ["string", "null"] },
+          "event_origin": { "enum": ["agent_task_activity", "platform_background_activity", "sandbox_setup_activity", "model_inference_activity", "unclassified_activity"] },
+          "destination": { "type": ["object", "null"], "additionalProperties": false, "required": ["host", "port"], "properties": { "host": { "type": "string" }, "port": { "type": ["integer", "null"] } } },
+          "http_method": { "type": ["string", "null"] },
+          "http_path": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "action_and_policy_events": {
+      "type": "object", "additionalProperties": false,
+      "required": ["agent_action", "events_observed_during_action", "events_outside_action", "association_method"],
+      "properties": {
+        "agent_action": { "type": "object" },
+        "events_observed_during_action": { "type": "array", "items": { "$ref": "#/eventRef" } },
+        "events_outside_action": { "type": "array", "items": { "$ref": "#/eventRef" } },
+        "association_method": { "const": "isolated_sandbox_single_action_with_log_boundaries" }
+      }
+    },
+    "outcomes": {
+      "type": "object", "additionalProperties": false,
+      "required": ["openshell_policy_decision", "task_result", "action_result_after_openshell"],
+      "properties": {
+        "openshell_policy_decision": {
+          "type": "object", "additionalProperties": false,
+          "required": ["value", "evidence_status", "reason", "matched_rule", "event_ids"],
+          "properties": {
+            "value": { "enum": ["OPENSHELL_ALLOWED", "OPENSHELL_DENIED", null] },
+            "evidence_status": { "enum": ["OPENSHELL_DECISION_OBSERVED", "OPENSHELL_DECISION_MISSING", "OPENSHELL_DECISION_AMBIGUOUS"] },
+            "reason": { "type": ["string", "null"] },
+            "matched_rule": { "type": ["string", "null"] },
+            "event_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          },
+          "oneOf": [
+            { "properties": { "value": { "enum": ["OPENSHELL_ALLOWED", "OPENSHELL_DENIED"] }, "evidence_status": { "enum": ["OPENSHELL_DECISION_OBSERVED"] } } },
+            { "properties": { "value": { "enum": [null] }, "evidence_status": { "enum": ["OPENSHELL_DECISION_MISSING"] } } },
+            { "properties": { "value": { "enum": [null] }, "evidence_status": { "enum": ["OPENSHELL_DECISION_AMBIGUOUS"] } } }
+          ]
+        },
+        "task_result": {
+          "type": "object", "additionalProperties": false,
+          "required": ["value", "reason"],
+          "properties": {
+            "value": { "enum": ["TASK_COMPLETED", "TASK_FAILED", "TASK_PARTIALLY_COMPLETED", "TASK_RESULT_UNKNOWN"] },
+            "reason": { "type": ["string", "null"] }
+          }
+        },
+        "action_result_after_openshell": {
+          "type": "object", "additionalProperties": false,
+          "required": ["value", "reason", "supporting_event_ids"],
+          "properties": {
+            "value": { "enum": ["OPENSHELL_ALLOWED_ACTION_PROCEEDED", "OPENSHELL_ALLOWED_ACTION_DID_NOT_PROCEED", "OPENSHELL_DENIED_ACTION_BLOCKED", "OPENSHELL_DENIED_ACTION_PROCEEDED", "OPENSHELL_ACTION_RESULT_NOT_CONFIRMED"] },
+            "reason": { "type": ["string", "null"] },
+            "supporting_event_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          }
+        }
+      }
+    },
+    "evaluation_metadata": {
+      "type": "object", "additionalProperties": false,
+      "required": ["action_policy_behavior", "attribution_basis", "note"],
+      "properties": {
+        "action_policy_behavior": { "enum": ["COMPLIANT_ACTION", "PROHIBITED_ACTION_ATTEMPTED", "ACTION_POLICY_BEHAVIOR_UNKNOWN"] },
+        "attribution_basis": { "enum": ["isolated_conversation_and_sandbox_single_tool_call_exact_destination_inside_boundaries", null] },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "execution_checks": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evidence_collection_status", "agent_instruction_compliance", "tool_execution_status", "evidence_completeness", "policy_remained_unchanged"],
+      "properties": {
+        "evidence_collection_status": { "enum": ["Succeeded", "Failed"] },
+        "agent_instruction_compliance": { "enum": ["Passed", "Failed", "Unable to Determine"] },
+        "tool_execution_status": { "enum": ["Succeeded", "Failed", "Unknown"] },
+        "evidence_completeness": { "enum": ["Complete", "Truncated", "Incomplete"] },
+        "policy_remained_unchanged": { "type": "boolean" }
+      }
+    },
+    "routing": {
+      "type": "object", "additionalProperties": false,
+      "required": ["output", "training_eligible", "reasons"],
+      "properties": {
+        "output": { "enum": ["accepted", "needs_review", "excluded"] },
+        "training_eligible": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "identifiers": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run_id", "execution_id", "conversation_id", "sandbox_id", "capture_id"],
+      "properties": {
+        "run_id": { "type": ["string", "null"] }, "execution_id": { "type": ["string", "null"] }, "conversation_id": { "type": ["string", "null"] },
+        "sandbox_id": { "type": ["string", "null"] }, "capture_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "integrity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["bundle_manifest_hash", "raw_evidence_hash", "record_hash", "dropped_event_count"],
+      "properties": {
+        "bundle_manifest_hash": { "type": ["string", "null"] }, "raw_evidence_hash": { "type": ["string", "null"] },
+        "record_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "dropped_event_count": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "stamp": {
+    "type": "object", "additionalProperties": false,
+    "required": ["value", "source"],
+    "properties": { "value": { "type": ["string", "integer", "null"] }, "source": { "type": "string" } }
+  },
+  "eventRef": {
+    "type": "object", "additionalProperties": false,
+    "required": ["sequence", "raw_event_reference", "event_type", "decision", "event_origin"],
+    "properties": {
+      "sequence": { "type": "integer", "minimum": 1 }, "raw_event_reference": { "type": "string" }, "event_type": { "type": ["string", "null"] },
+      "decision": { "enum": [null, "ALLOW", "DENY"] },
+      "event_origin": { "enum": ["agent_task_activity", "platform_background_activity", "sandbox_setup_activity", "model_inference_activity", "unclassified_activity"] }
+    }
+  }
+}

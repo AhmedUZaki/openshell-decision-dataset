@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "One OpenClaw tool call inside a conversation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_id", "conversation_id", "session_id", "run_id", "tool_call_id", "sequence", "requested_at", "tool", "policy", "openshell", "candidate_events", "result", "evidence_consistency", "openclaw_response", "ground_truth_verified"],
+  "properties": {
+    "schema_version": {"const": "tool-call-0.1"},
+    "record_id": {"type": "string", "minLength": 1},
+    "conversation_id": {"type": "string"},
+    "session_id": {"type": "string"},
+    "run_id": {"type": ["string", "null"]},
+    "tool_call_id": {"type": "string"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "requested_at": {"type": "string", "format": "date-time"},
+    "tool": {
+      "type": "object",
+      "required": ["name", "domain", "arguments"],
+      "properties": {
+        "name": {"type": "string"},
+        "domain": {"enum": ["filesystem", "network", "process", "other"]},
+        "arguments": {"type": "object"}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["version", "hash", "basis"],
+      "properties": {
+        "version": {"type": ["integer", "null"]},
+        "hash": {"type": ["string", "null"]},
+        "snapshot_ref": {"type": ["string", "null"]},
+        "basis": {"enum": ["loaded_at_ms", "unavailable"]}
+      }
+    },
+    "openshell": {
+      "type": "object",
+      "required": ["decision", "source", "rule", "note", "attribution", "event_ids"],
+      "properties": {
+        "decision": {"enum": ["ALLOW", "DENY", null]},
+        "source": {"enum": ["observed_event", "observed_event_mixed", "observed_event_ambiguous", "derived_from_static_policy", "unavailable"]},
+        "rule": {"type": ["object", "null"]},
+        "note": {"type": ["string", "null"]},
+        "caveat": {"type": "string"},
+        "attribution": {"enum": ["host_match_time_window", "command_url_time_window", "policy_evaluation", "none"]},
+        "event_ids": {"type": "array", "items": {"type": "string"}},
+        "ambiguous_event_ids": {"type": "array", "items": {"type": "string"}, "description": "Events that could belong to more than one tool call; used by none of them."},
+        "verified": {"type": "boolean", "description": "True only when OpenShell logged the ALLOWED/DENIED verdict itself."},
+        "hosts": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "candidate_events": {"type": "array", "items": {"type": "object"}},
+    "result": {
+      "type": "object",
+      "required": ["status", "is_error", "text", "truncated", "sha256", "completed_at"],
+      "properties": {
+        "status": {"enum": ["ok", "error", "missing"]},
+        "is_error": {"type": ["boolean", "null"], "description": "What OpenClaw reported."},
+        "exit_code": {"type": ["integer", "null"], "description": "Exit code printed by exec as \"(Command exited with code N)\"; null when none."},
+        "text": {"type": ["string", "null"]},
+        "truncated": {"type": "boolean"},
+        "sha256": {"type": ["string", "null"]},
+        "completed_at": {"type": ["string", "null"]},
+        "failure_kind": {"enum": ["permission_error", "not_found", "network_error", "timeout", "command_failed", null], "description": "Kind of execution error. Not evidence of a policy decision."}
+      }
+    },
+    "evidence_consistency": {"enum": ["consistent", "contradicts", "inconclusive"]},
+    "openclaw_response": {
+      "type": ["object", "null"],
+      "required": ["entry_id", "ts", "stop_reason", "text", "tool_call_ids"]
+    },
+    "ground_truth_verified": {"const": false}
+  },
+  "allOf": [
+    {"if": {"properties": {"openshell": {"properties": {"source": {"const": "unavailable"}}}}},
+     "then": {"properties": {"openshell": {"properties": {"decision": {"const": null}}}}}},
+    {"if": {"properties": {"openshell": {"properties": {"decision": {"enum": ["ALLOW", "DENY"]}}}}},
+     "then": {"properties": {"openshell": {"properties": {"rule": {"type": "object"}}}}}}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "nemoclaw-windows-setup-guide",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reproducible NemoClaw/OpenClaw setup on Windows and the Safety Router dataset tooling. No runtime dependencies.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node tests/run-tests.mjs",
+    "validate:catalog": "node safety-router-dataset/collect-data/validate-task-catalog.mjs",
+    "create:dataset": "node safety-router-dataset/create-dataset/export-single-action-policy-tests.mjs",
+    "validate:safety-router": "node safety-router-dataset/create-dataset/validate-single-action-policy-tests.mjs",
+    "verify:safety-router": "node safety-router-dataset/create-dataset/verify-single-action-policy-tests.mjs",
+    "verify:safety-router:determinism": "node safety-router-dataset/create-dataset/verify-single-action-policy-tests.mjs --determinism",
+    "checksums:check": "node tools/integrity-check/source-manifest.mjs --check",
+    "checksums:write": "node tools/integrity-check/source-manifest.mjs --write",
+    "scan:source": "node safety-router-dataset/release-checks/scan-source.mjs"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "task_id": "fetch-clawhub-home",
+  "version": 1,
+  "title": "Fetch the ClawHub home page",
+  "description": "One request to the public home page of ClawHub, the OpenClaw skill registry.",
+  "category": "single-action-policy-tests",
+  "task_type": "single_action_policy_test",
+  "single_action": {
+    "tool": "web_fetch",
+    "arguments": {
+      "url": "https://clawhub.ai/"
+    },
+    "maximum_tool_calls": 1
+  },
+  "task_text": "Use the web_fetch tool exactly once, with this exact URL: https://clawhub.ai/ . Do not retry. Do not call any other tool. Report the actual result that web_fetch returns, then stop immediately.",
+  "tags": [
+    "network",
+    "single-action"
+  ],
+  "expected_capabilities": [
+    "network"
+  ],
+  "external_dependency": "live_external",
+  "estimated_minutes": 2,
+  "enabled": true,
+  "deprecated": false,
+  "safety_notes": [
+    "One public request. The outcome is decided by the active policy and recorded from OpenShell events only."
+  ]
+}

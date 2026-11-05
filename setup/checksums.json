@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 2,
+  "algorithm": "SHA256",
+  "protected": {
+    "directories": [
+      "safety-router-dataset",
+      "setup",
+      "tools"
+    ],
+    "root_file_patterns": [
+      "*.cmd"
+    ],
+    "root_files": [
+      "package.json"
+    ],
+    "extra_files": [
+      "tests/run-tests.mjs"
+    ],
+    "exclude_files": [
+      "setup/checksums.json"
+    ],
+    "exclude_directories": [
+      ".git",
+      ".local",
+      "node_modules",
+      "__pycache__"
+    ],
+    "exclude_extensions": [
+      ".pyc",
+      ".log"
+    ]
+  },
+  "files": [
+    {
+      "path": "Generate Dataset.cmd",
+      "sha256": "8f94941874b56834ac37fc01a3fdd83f2dc8cae5229fbfe1f7a0cfc5428c62b8"
+    },
+    {
+      "path": "Install Everything.cmd",
+      "sha256": "27ab593776ad6df64ce727ac34ebe34584935b94937df92a0768058f6380528c"
+    },
+    {
+      "path": "Run Tests.cmd",
+      "sha256": "a8b2fe48d352f9c55f157feb45993ba450873b3cc7017a4389f960a7bd8d7a46"
+    },
+    {
+      "path": "Start OpenClaw.cmd",
+      "sha256": "a6f8e17e67c2a9fe9468ae4316760dfb5b9abac69d0bef3c8cd322c7c377d62c"
+    },
+    {
+      "path": "Verify Installation.cmd",
+      "sha256": "3df0808ad1ccd05411b2fc17d78814f698edd82a2cdecd49873184d694ac381b"
+    },
+    {
+      "path": "package.json",
+      "sha256": "2764005a9618ae9a038b428f67db41c6157d96894d5a405abb7134ebdafcf17c"
+    },
+    {
+      "path": "safety-router-dataset/README.md",
+      "sha256": "db3bfc4af91eaabccd9aff77dea3385b7174ba0cb0672c8c68cf286fd314d1ac"
+    },
+    {
+      "path": "safety-router-dataset/collect-data/collection-runner.mjs",
+      "sha256": "63f3932ff255c58f7787b18f39a284bc277a397e2d3599b9a5746de253b36467"
+    },
+    {
+      "path": "safety-router-dataset/collect-data/collection-selection.mjs",
+      "sha256": "85eeeb9c3cccafb3d1dd82b9f8b5ef341d9e11ad58f92e3df355967f3f608d15"
+    },
+    {
+      "path": "safety-router-dataset/collect-data/menu.mjs",
+      "sha256": "4739d986c999997d7db7e6b05a6ff16efd94e9c27bc2579f7670b8fedfc240ea"
+    },
+    {
+      "path": "safety-router-dataset/collect-data/progress-display.mjs",
+      "sha256": "daef8a9716151c206f239efb34dfe3d0b6a995a34dfccc15072217331a015c2e"
+    },
+    {
+      "path": "safety-router-dataset/collect-data/system-adapter.mjs",
+      "sha256": "f2d8cb03db47cc25338f3d5bdb30f179fd55938e0e0a1070a5404b89364b2fe3"
+    },
+    {
+      "path": "safety-router-dataset/collect-data/task-catalog.mjs",
+      "sha256": "02e82aa5cbc662f03a907f47131d42e253304bd7d80290703202a3a6b54256ca"
+    },
+    {
+      "path": "safety-router-dataset/collect-data/validate-task-catalog.mjs",
+      "sha256": "400f2daaf9c2786545bd739310afc14b1d90f52d4db6ee945fec91ab29b4041a"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/build-dataset.mjs",
+      "sha256": "85c561cfc760a417748980ef872919ad62d3512c984ee8235c749da179c76ea6"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/dataset-location.mjs",
+      "sha256": "95cdda8d5dcba6c19d6bdc944a1a7e5d0b503ac9fa014b51a7ba52487a74fb7c"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/export-single-action-policy-tests.mjs",
+      "sha256": "29ca711c1b992e717c7c4cf967a329f2691897a41a234c44aa4f0e0909ca3282"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/schema-validate.mjs",
+      "sha256": "55b0fea11b47d7aeb2968c285dc56c0862b5bae9f14c64458aa08b4d1ba7dd7b"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/schemas/conversation.schema.json",
+      "sha256": "5e12121c5f7968e53d5915e5dd51a069ad10f897601b91de415b6226267541f2"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/schemas/single-action-policy-test-record.schema.json",
+      "sha256": "33f68dbf6a3085bd2fbbf297a50aeceb41370b777da72ce6db27ac16652d406f"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/schemas/tool-call.schema.json",
+      "sha256": "92dcc35f12b91b7e0dc8b9cabea51425e93cee9da4d431815af3b32691d4381a"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/validate-single-action-policy-tests.mjs",
+      "sha256": "703318f3357b67e4702d89d2690dc9c7cfd46b19acf1139e86e95d40298bfbf8"
+    },
+    {
+      "path": "safety-router-dataset/create-dataset/verify-single-action-policy-tests.mjs",
+      "sha256": "217813ee3a718d82c07f5950c0c54c43b24da4af5e0b6121e1fe3f3409f04e87"
+    },
+    {
+      "path": "safety-router-dataset/release-checks/scan-source.mjs",
+      "sha256": "9af2b9d0b7dc0d64d59b933c0edd469a6412d23956233ca75c75dcfeef6a6d85"
+    },
+    {
+      "path": "safety-router-dataset/release-checks/scan.mjs",
+      "sha256": "4dfe1a8aff73292a7364ec5c576bdcf9832dba95b10968866cb70d4a85831300"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/README.md",
+      "sha256": "1c1f288e0d35c775c8fabc17378196e84a95f33c10b095e0a89853443c2f5671"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/catalog.json",
+      "sha256": "85b0fbfb96eb6763b07ac357ff0fef386e836f5cd9f8eeb480c90fd51148301d"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-clawhub-home.json",
+      "sha256": "9614b460a3f0b419de902ca2d8ef7b06f149282f6bc0e7aa6a26a07e2db02c64"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-example-https.json",
+      "sha256": "20becf7a5bf70aeb092bc6fdf51db973c17547a06e1d558a3bc6b50319fef75a"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-github-raw-file.json",
+      "sha256": "a8fe5dd774eb12d0e6b1a3b96dfc3586f24c0ead1131d40951501fc800d537c4"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-huggingface-resource.json",
+      "sha256": "8a260ee38538bb34ddfdd824d1dd5b783a9a287bb471c626a071c7a5fa237716"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-litellm-prices.json",
+      "sha256": "127abb2dcdbcd3f80cebe7b2f553f65b0e69eb70bb1899d1df8888a8dc12f6f5"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-npm-package.json",
+      "sha256": "314d656a293a0afdcfda97fcffbc1a05cd7a6bd4a724f62b19934b6e07769f30"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-openclaw-catalog.json",
+      "sha256": "af9fb92b9f1998a28d48233038bb6647ec7383d402289eacf1dbcb3e45078dcc"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-openrouter-models.json",
+      "sha256": "9f9492b4c3d42768984d3e3a601356235a9e8f363eca0a12dfab3c2d70d916f3"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-pypi-package.json",
+      "sha256": "85d7e4f533d414924c294f99cb128d1ea72d0319fb57e1287a65256a491af8a3"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-weather-api.json",
+      "sha256": "f0099e8cbad321c4258887944d2c2f8cee5cf2e90d7e827000206bfbc4bfe39a"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-wikipedia-summary.json",
+      "sha256": "22744687b97f459bfcbdacc0400a81471d6ec1e879eaa503bb1ad64f352121fe"
+    },
+    {
+      "path": "safety-router-dataset/task-catalog/single-action-policy-tests/fetch-wttr-weather.json",
+      "sha256": "e8d6176eab57fdadfa58bf44d99b9af03382d0f8adc884e700fdf8d6dca04ea5"
+    },
+    {
+      "path": "setup/Generate-Dataset.ps1",
+      "sha256": "e963f8055eaa92385c689cf0b3bdf1a5b20de1c02becec43a8843e6707657e13"
+    },
+    {
+      "path": "setup/Install-Everything.ps1",
+      "sha256": "d42c4de83ab0626ff514c240a0b94c3745f8451e15447729b4b96d7d1bbb0276"
+    },
+    {
+      "path": "setup/Verify-Checksums.ps1",
+      "sha256": "5d1563ce0eab7b4bcb938427315a50ac062b6ac9179ab5dcd1a646c30181a8d6"
+    },
+    {
+      "path": "setup/Verify-Installation.ps1",
+      "sha256": "b270e16585b3f20e32f11e48cc742ba77eb53b2013520e8f0cf588d5f376e083"
+    },
+    {
+      "path": "setup/pins.env",
+      "sha256": "8d733ca306f75ee13678027a0e2108c6abd554b4025c2f93043ad49abdc3738e"
+    },
+    {
+      "path": "setup/wsl-linux/install-stack.sh",
+      "sha256": "8d28928b88f35d69db56f18befe810b943a7afbeb00a351248a2af895b2a6509"
+    },
+    {
+      "path": "tests/run-tests.mjs",
+      "sha256": "68cb4d71a64e29463c7acd1e6f4883c3b30f7b55ef006d08909992928d061933"
+    },
+    {
+      "path": "tools/events-panel/Enable-Panel.ps1",
+      "sha256": "8f4eb2adf3df2cb59a69db0a77936d3ae111794650e83514ce87cf84fcc9fa97"
+    },
+    {
+      "path": "tools/events-panel/conversations.mjs",
+      "sha256": "0d25269cded73e5f3156b890d38e8878e124dcdaf01947535f183fb6d4b5e889"
+    },
+    {
+      "path": "tools/events-panel/evidence.mjs",
+      "sha256": "2483e80c49c2fceb5a2bd04b692520af350a259b381494a6d2ccb2b24c5dd5ff"
+    },
+    {
+      "path": "tools/events-panel/openshell-events.mjs",
+      "sha256": "d485f2bfa12bdd1d32d6df4879b0929e2b3a3bd1f3b02d875b294284bc1280bc"
+    },
+    {
+      "path": "tools/events-panel/panel-service.mjs",
+      "sha256": "1c403e5581177badc944a401c966225a69a735635590eefc1c73d3286e127da7"
+    },
+    {
+      "path": "tools/events-panel/panel-ui.js",
+      "sha256": "1446eb2301c975fdcbe4e35c7cb6e59f63247ef75ba63fffaa3c593c9f0f92a6"
+    },
+    {
+      "path": "tools/events-panel/patch-dashboard-ui.py",
+      "sha256": "d33fc2e6fc9e14b03b5b9866b978dbfc287b8e80343d7b0ef72040308e00891a"
+    },
+    {
+      "path": "tools/events-panel/policy-labels.mjs",
+      "sha256": "d41c3f73ff4431f712abbdaccb14ccc3c090eac0b9e82a47c90a2df4a27aec14"
+    },
+    {
+      "path": "tools/events-panel/provenance.mjs",
+      "sha256": "a74ecfb3bcf776f899154ca82b6bfd18e8b0a17a8d3a5c79c7bd5e54346453a2"
+    },
+    {
+      "path": "tools/events-panel/service-files.txt",
+      "sha256": "a386d6ae298eb8de12d6d9228e29d2ef50233605ded76d68ac9e3848c6f3570c"
+    },
+    {
+      "path": "tools/events-panel/single-action-record.mjs",
+      "sha256": "a45ecc53d2af452a7e33b7f234d3be87651be5f525b9c2bce54a5999b42ebd15"
+    },
+    {
+      "path": "tools/events-panel/source-identity.mjs",
+      "sha256": "ae0121a7ed8045da4ffd2a1eec22fa0e5b7b96126784497c5a7e3a69766ddde7"
+    },
+    {
+      "path": "tools/events-panel/tool-calls.mjs",
+      "sha256": "a7502f9e4ec78f4ed1be23e26e9d07d4a92aaec35cc2a2654b7f4cc16001eee5"
+    },
+    {
+      "path": "tools/integrity-check/source-manifest.mjs",
+      "sha256": "b9e48d510c9f0a0ee5e64fbb86e32c10a657ebc06617b5372c4d18a83afa00f7"
+    },
+    {
+      "path": "tools/launchers/Start-OpenClaw.ps1",
+      "sha256": "f316c00fc2ae7a12f3317fb37c7e72f0f9caf753fcc9b5c59aa4227bfbacc776"
+    }
+  ]
+}

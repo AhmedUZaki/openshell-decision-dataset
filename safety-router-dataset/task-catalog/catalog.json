@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "active_task_type": "single_action_policy_test",
+  "categories": [
+    {
+      "id": "single-action-policy-tests",
+      "title": "Single-Action Policy Tests",
+      "description": "One Agent tool call, once, against one destination, in one isolated Sandbox under one unchanged policy.",
+      "order": 1
+    }
+  ],
+  "registry": {
+    "fetch-clawhub-home": {
+      "version": 1,
+      "hash": "0d8e024c4d515384d766473669f0b518797e86a8674c061f1a9f924612c46faa",
+      "history": [
+        {
+          "version": 1,
+          "hash": "0d8e024c4d515384d766473669f0b518797e86a8674c061f1a9f924612c46faa"
+        }
+      ]
+    },
+    "fetch-example-http": {
+      "version": 1,
+      "hash": "23b5ccd81527ed2eda186639f09388db436afd734361b6c7097639e0c8e78506",
+      "history": [
+        {
+          "version": 1,
+          "hash": "23b5ccd81527ed2eda186639f09388db436afd734361b6c7097639e0c8e78506"
+        }
+      ]
+    },
+    "fetch-example-https": {
+      "version": 1,
+      "hash": "07c023cbe459817fcdfe62624e017f72b6924090d425193de0f5941087304848",
+      "history": [
+        {
+          "version": 1,
+          "hash": "07c023cbe459817fcdfe62624e017f72b6924090d425193de0f5941087304848"
+        }
+      ]
+    },
+    "fetch-github-raw-file": {
+      "version": 1,
+      "hash": "ff4267f487511ead6dab18fe682a3e6de7ef9c863576f3f81606f27d17d941b2",
+      "history": [
+        {
+          "version": 1,
+          "hash": "ff4267f487511ead6dab18fe682a3e6de7ef9c863576f3f81606f27d17d941b2"
+        }
+      ]
+    },
+    "fetch-httpbin-json": {
+      "version": 1,
+      "hash": "84ec0a06972e9a438a5387b08574c1d1cf003c0b1e8345b068af5b2fcb4dca1e",
+      "history": [
+        {
+          "version": 1,
+          "hash": "84ec0a06972e9a438a5387b08574c1d1cf003c0b1e8345b068af5b2fcb4dca1e"
+        }
+      ]
+    },
+    "fetch-huggingface-resource": {
+      "version": 1,
+      "hash": "ead4bfc3e59bb8814487526e7c10ff3d22c53e94ba2903d4ec9bec413dc6ab82",
+      "history": [
+        {
+          "version": 1,
+          "hash": "ead4bfc3e59bb8814487526e7c10ff3d22c53e94ba2903d4ec9bec413dc6ab82"
+        }
+      ]
+    },
+    "fetch-ip-address": {
+      "version": 1,
+      "hash": "333e58a78d0ee761e7100fb833b82ae4ac6e4ca7ce73acfed9492dc75f8fa91f",
+      "history": [
+        {
+          "version": 1,
+          "hash": "333e58a78d0ee761e7100fb833b82ae4ac6e4ca7ce73acfed9492dc75f8fa91f"
+        }
+      ]
+    },
+    "fetch-litellm-prices": {
+      "version": 1,
+      "hash": "d7018d4262a9be51fe5e3e085cb471403d961e5fdd440d578fcdf0bad151ab89",
+      "history": [
+        {
+          "version": 1,
+          "hash": "d7018d4262a9be51fe5e3e085cb471403d961e5fdd440d578fcdf0bad151ab89"
+        }
+      ]
+    },
+    "fetch-npm-package": {
+      "version": 1,
+      "hash": "16cf87d3441476e518b79f56de4806ffa697ab0b7773c10789dbfe022363b30f",
+      "history": [
+        {
+          "version": 1,
+          "hash": "16cf87d3441476e518b79f56de4806ffa697ab0b7773c10789dbfe022363b30f"
+        }
+      ]
+    },
+    "fetch-openclaw-catalog": {
+      "version": 1,
+      "hash": "497db8c5271d3c1cd899fca3a83b27a0201a827ce1bdd8d65cb92e1a4da91f5a",
+      "history": [
+        {
+          "version": 1,
+          "hash": "497db8c5271d3c1cd899fca3a83b27a0201a827ce1bdd8d65cb92e1a4da91f5a"
+        }
+      ]
+    },
+    "fetch-openclaw-documentation": {
+      "version": 1,
+      "hash": "3b4c89da33815089b19062c782819bc777a349cbd3f7fada870ae066ef768304",
+      "history": [
+        {
+          "version": 1,
+          "hash": "3b4c89da33815089b19062c782819bc777a349cbd3f7fada870ae066ef768304"
+        }
+      ]
+    },
+    "fetch-openrouter-models": {
+      "version": 1,
+      "hash": "6bcb14736245666ab1c22c57aef7c879b7e21eb2e706960b772a358180020b49",
+      "history": [
+        {
+          "version": 1,
+          "hash": "6bcb14736245666ab1c22c57aef7c879b7e21eb2e706960b772a358180020b49"
+        }
+      ]
+    },
+    "fetch-pypi-package": {
+      "version": 1,
+      "hash": "3074976b84076a458b24a8ae1938d46921dd0e2354dbcb535dba819e476312eb",
+      "history": [
+        {
+          "version": 1,
+          "hash": "3074976b84076a458b24a8ae1938d46921dd0e2354dbcb535dba819e476312eb"
+        }
+      ]
+    },
+    "fetch-unusual-port": {
+      "version": 1,
+      "hash": "2280d01000dbf5536f0edeb6cdb4d6423dbee01cdbb1007801e8162a8bbbcd97",
+      "history": [
+        {
+          "version": 1,
+          "hash": "2280d01000dbf5536f0edeb6cdb4d6423dbee01cdbb1007801e8162a8bbbcd97"
+        }
+      ]
+    },
+    "fetch-weather-api": {
+      "version": 1,
+      "hash": "e49c4caca466aef0ab85f75625acdf79639c3fe44b3094a91214d6c9cf1c650d",
+      "history": [
+        {
+          "version": 1,
+          "hash": "e49c4caca466aef0ab85f75625acdf79639c3fe44b3094a91214d6c9cf1c650d"
+        }
+      ]
+    },
+    "fetch-wikipedia-article": {
+      "version": 1,
+      "hash": "1a633287e73ed9087bb2590bb4844289b5a8c3be86099ee6241269c48d48cc9e",
+      "history": [
+        {
+          "version": 1,
+          "hash": "1a633287e73ed9087bb2590bb4844289b5a8c3be86099ee6241269c48d48cc9e"
+        }
+      ]
+    },
+    "fetch-wikipedia-summary": {
+      "version": 1,
+      "hash": "91d706fe19a459e5b2d84ab052b196553da779ec983a77f5f864708ce8f1c2f2",
+      "history": [
+        {
+          "version": 1,
+          "hash": "91d706fe19a459e5b2d84ab052b196553da779ec983a77f5f864708ce8f1c2f2"
+        }
+      ]
+    },
+    "fetch-wttr-weather": {
+      "version": 1,
+      "hash": "c2ed25301bf71185d36a92fb8aa453520ed5d25b7bc645868810fba34ac9141a",
+      "history": [
+        {
+          "version": 1,
+          "hash": "c2ed25301bf71185d36a92fb8aa453520ed5d25b7bc645868810fba34ac9141a"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,42 @@
+# Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*
+secrets*
+
+# Dependencies and private runtime data
+node_modules/
+.nemoclaw/
+.openclaw/
+.openshell/
+.ollama/
+models/
+volumes/
+backups/
+installer-state/
+logs/
+*.log
+
+# Large artifacts
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.vhd
+*.vhdx
+*.gguf
+*.safetensors
+
+# Local editor and OS files
+.local/
+*-effective.json
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/

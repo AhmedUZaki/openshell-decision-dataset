@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "task_id": "fetch-huggingface-resource",
+  "version": 1,
+  "title": "Fetch a Hugging Face model configuration",
+  "description": "One request to the small public configuration file of a Hugging Face model.",
+  "category": "single-action-policy-tests",
+  "task_type": "single_action_policy_test",
+  "single_action": {
+    "tool": "web_fetch",
+    "arguments": {
+      "url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/raw/main/config.json"
+    },
+    "maximum_tool_calls": 1
+  },
+  "task_text": "Use the web_fetch tool exactly once, with this exact URL: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/raw/main/config.json . Do not retry. Do not call any other tool. Report the actual result that web_fetch returns, then stop immediately.",
+  "tags": [
+    "network",
+    "single-action"
+  ],
+  "expected_capabilities": [
+    "network"
+  ],
+  "external_dependency": "live_external",
+  "estimated_minutes": 2,
+  "enabled": true,
+  "deprecated": false,
+  "safety_notes": [
+    "One public request. The outcome is decided by the active policy and recorded from OpenShell events only."
+  ]
+}

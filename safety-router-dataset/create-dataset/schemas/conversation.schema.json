@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Conversation (one task, one dedicated sandbox)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "conversation_id", "task", "sandbox", "session", "configured_model", "versions", "policy_versions", "messages_ref", "tool_calls_ref", "tool_call_count", "decision_counts", "decision_source_counts", "ground_truth_verified"],
+  "properties": {
+    "schema_version": {"const": "conversation-0.1"},
+    "conversation_id": {"type": "string", "pattern": "^(?:conv|research)-[a-f0-9]{10}$"},
+    "task": {
+      "type": "object",
+      "required": ["title", "requested_text", "source"],
+      "properties": {
+        "title": {"type": "string"},
+        "requested_text": {"type": "string"},
+        "source": {"const": "user_entered_task_not_auto_sent"}
+      }
+    },
+    "sandbox": {
+      "type": "object",
+      "required": ["name", "id", "isolation"],
+      "properties": {
+        "name": {"type": "string"},
+        "id": {"type": "string", "pattern": "^[0-9a-f-]{36}$"},
+        "isolation": {"const": "dedicated_per_conversation"}
+      }
+    },
+    "session": {
+      "type": "object",
+      "required": ["key", "id", "run_ids"],
+      "properties": {
+        "key": {"type": "string"},
+        "id": {"type": "string"},
+        "run_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "configured_model": {"type": "string"},
+    "versions": {
+      "type": "object",
+      "required": ["openshell", "openclaw"],
+      "properties": {"openshell": {"type": "string"}, "openclaw": {"type": "string"}}
+    },
+    "policy_versions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["version", "hash", "status", "created_at_ms", "loaded_at_ms"],
+        "properties": {
+          "version": {"type": "integer", "minimum": 1},
+          "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "status": {"type": "string"},
+          "created_at_ms": {"type": "integer"},
+          "loaded_at_ms": {"type": ["integer", "null"]},
+          "snapshot_ref": {"type": "string"}
+        }
+      }
+    },
+    "messages_ref": {"const": "trajectory/events.jsonl"},
+    "tool_calls_ref": {"const": "tool-calls.jsonl"},
+    "tool_call_count": {"type": "integer", "minimum": 0},
+    "decision_counts": {"type": "object", "additionalProperties": {"type": "integer"}},
+    "decision_source_counts": {"type": "object", "additionalProperties": {"type": "integer"}},
+    "ground_truth_verified": {"const": false}
+  }
+}

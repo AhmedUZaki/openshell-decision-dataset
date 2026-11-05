@@ -1,0 +1,5 @@
+# Keep bytes exactly as committed: setup/checksums.json hashes these files, and
+# the shell/Python scripts run on Linux and must keep LF line endings.
+* -text
+*.sh text eol=lf
+*.py text eol=lf
