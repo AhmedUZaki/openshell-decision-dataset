@@ -1,6 +1,6 @@
 # Choosing a license
 
-**No license has been selected, and no `LICENSE` file exists.** That is deliberate: the choice belongs to the owner. Until one is chosen, do not publish the repository for reuse.
+**The owner chose the MIT license** for the code and documentation; the text is in [`LICENSE`](../LICENSE), with the copyright line "The nemoclaw-windows-setup-guide contributors" (no individual name). The options that were compared are kept below for reference.
 
 | Option | What it lets others do | Notes |
 | --- | --- | --- |
@@ -15,10 +15,8 @@
 - The license of the **code** is separate from the terms of a **dataset release**. A dataset built from public web endpoints and OpenShell logs may need its own terms; decide them before publishing any dataset.
 - Third-party material keeps its own license. This project does not redistribute NVIDIA source code, model weights or the papers kept under `.local/papers/`.
 
-## When you have decided
+## Changing the license later
 
-1. Add the license text as `LICENSE` at the repository root (copy the official text).
-2. Replace the README note "License not selected yet" with the license name.
-3. Run `npm run checksums:write` if you added a protected file, then `npm test`.
+Replace `LICENSE` with the official text of the new license, update the README note, then run `npm run checksums:write` and `npm test`. Copies already published keep the license they were published under.
 
 This page is background information, not legal advice.

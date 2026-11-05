@@ -193,9 +193,12 @@ test('the files Git would stage contain no .local data, no secret and no user-sp
 });
 
 // ---- Documentation and repository decisions ---------------------------------------------------------------------------------------------
-test('the license is not chosen on the owner\'s behalf, and the choice is documented', () => {
-  assert.equal(['LICENSE', 'LICENSE.md', 'LICENSE.txt', 'COPYING'].some(f => existsSync(join(real, f))), false, 'no LICENSE file until the owner selects one');
-  assert.match(read('README.md'), /License not selected yet — choose a license before public release\./);
+test('the owner chose MIT: the LICENSE file, the README note and the comparison are in place', () => {
+  const lic = read('LICENSE');
+  assert.match(lic, /^MIT License\r?\n/);
+  assert.match(lic, /Copyright \(c\) 2026 The nemoclaw-windows-setup-guide contributors/);
+  assert.match(lic, /Permission is hereby granted, free of charge/);
+  assert.match(read('README.md'), /\*\*License: MIT\*\*/);
   const d = read('docs/license-choice.md');
   for (const needle of ['MIT', 'Apache-2.0', 'patent grant', 'does not grant']) assert.ok(d.includes(needle), needle);
 });

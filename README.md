@@ -18,7 +18,7 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 | 2b. Or collect in bulk | Double-click `Generate Dataset.cmd`, press 1 (Collect new data), then 1 in the collector menu: choose policies, tests and the number of independent executions, review the calculation, type `RUN`. It ends with export, validation and verification of the Safety Router Dataset | [docs/dataset/collecting-data.md](docs/dataset/collecting-data.md), [tasks](safety-router-dataset/task-catalog/README.md) |
 | 3. Create the Dataset | `Generate Dataset.cmd` option 2, Create Dataset (or `npm run create:dataset`): builds, validates, verifies independently and saves a NEW folder named with its UTC creation time under `.local/safety-router/datasets/` | [docs/dataset/safety-router-dataset.md](docs/dataset/safety-router-dataset.md) |
 
-> **License not selected yet — choose a license before public release.** See [docs/license-choice.md](docs/license-choice.md).
+> **License: MIT** (code and documentation). See [LICENSE](LICENSE) and [docs/license-choice.md](docs/license-choice.md); a released dataset needs its own terms.
 
 ## Layout
 
