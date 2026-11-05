@@ -174,7 +174,7 @@ missing prerequisite instead of silently substituting another component.
 
 ## Launcher
 
-Double-click "Start OpenClaw.cmd" in the nemoclaw-windows-setup-guide folder.
+Double-click "Start OpenClaw.cmd" in the project folder.
 
 The launcher starts Docker Desktop if needed, checks Ubuntu Docker integration,
 starts the existing Ollama and managed gateway services, runs NemoClaw recovery

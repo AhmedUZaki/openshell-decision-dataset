@@ -196,7 +196,7 @@ test('the files Git would stage contain no .local data, no secret and no user-sp
 test('the owner chose MIT: the LICENSE file, the README note and the comparison are in place', () => {
   const lic = read('LICENSE');
   assert.match(lic, /^MIT License\r?\n/);
-  assert.match(lic, /Copyright \(c\) 2026 The nemoclaw-windows-setup-guide contributors/);
+  assert.match(lic, /Copyright \(c\) 2026 The openshell-decision-dataset contributors/);
   assert.match(lic, /Permission is hereby granted, free of charge/);
   assert.match(read('README.md'), /\*\*License: MIT\*\*/);
   const d = read('docs/license-choice.md');

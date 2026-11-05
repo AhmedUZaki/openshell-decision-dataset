@@ -1,5 +1,5 @@
 {
-  "name": "nemoclaw-windows-setup-guide",
+  "name": "openshell-decision-dataset",
   "version": "0.1.0",
   "private": true,
   "description": "Reproducible NemoClaw/OpenClaw setup on Windows and the Safety Router dataset tooling. No runtime dependencies.",

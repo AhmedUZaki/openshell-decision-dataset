@@ -1,6 +1,6 @@
 # Choosing a license
 
-**The owner chose the MIT license** for the code and documentation; the text is in [`LICENSE`](../LICENSE), with the copyright line "The nemoclaw-windows-setup-guide contributors" (no individual name). The options that were compared are kept below for reference.
+**The owner chose the MIT license** for the code and documentation; the text is in [`LICENSE`](../LICENSE), with the copyright line "The openshell-decision-dataset contributors" (no individual name). The options that were compared are kept below for reference.
 
 | Option | What it lets others do | Notes |
 | --- | --- | --- |
