@@ -112,13 +112,6 @@ test('a catalog folder that declares the active type refuses a task without the 
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test('the GUI offers only the catalog route, no custom task and no category choice', () => {
-  const ui = readFileSync(join(tasksDir(), '..', '..', 'tools/events-panel/panel-ui.js'), 'utf8');
-  assert.ok(ui.includes("policyRequest('/catalog')") && ui.includes('Single-Action Policy Test'));
-  assert.ok(!/custom_manual|conversation-source|conversation-category/.test(ui));
-  assert.ok(ui.includes('/conversations/timeline') && ui.includes('Agent timeline') && ui.includes('OpenShell timeline'), 'both complete timelines can be shown');
-});
-
 test('the pilot stop conditions are exactly the rule breaks, and a missing decision is not one of them', () => {
   const rec = reasons => ({ routing: { output: 'excluded', training_eligible: false, reasons } });
   for (const r of ['No Tool Call occurred', '2 Tool Calls occurred; exactly one is allowed', 'The Tool Call used read, not the declared web_fetch', 'The Tool Call arguments differ from the declared arguments', 'The applied policy changed during the execution',

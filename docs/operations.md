@@ -9,7 +9,6 @@ Daily use, where the files live and how to back them up, and what to do when som
 | Start everything (Docker Desktop, Ollama, the managed gateway, the OpenClaw sandbox, the OpenShell panel) and open the dashboard at `http://127.0.0.1:18789/` | `Start OpenClaw.cmd` |
 | Check the installation (versions against `setup/pins.env`, file checksums, Ollama, the model, the sandbox) | `Verify Installation.cmd` |
 | Check the launcher without opening a browser | `powershell -File tools\launchers\Start-OpenClaw.ps1 -CheckOnly` |
-| Try one task by hand | the **Conversation** tab of the OpenShell panel ([panel](panel.md)) |
 | Collect data in bulk | `Generate Dataset.cmd` ([collecting the dataset](dataset/collecting-data.md)) |
 
 Private data (bundles, evidence, runs, the dataset) is under `.local/` and is ignored by Git.
@@ -89,7 +88,7 @@ The launcher prints the failing step and keeps the window open. It deletes nothi
 | `Ollama did not become ready.` | In Ubuntu run `curl http://127.0.0.1:11434/api/version`. If it fails, check `systemctl status ollama` and `journalctl -u ollama`. |
 | `The OpenClaw sandbox did not become ready.` | The launcher already retried for several minutes. Run it once more; if it still fails, check Docker Desktop for the `openshell-default--my-assistant-…` container and its logs. |
 | `Could not obtain the dashboard URL.` / `The local dashboard is not responding.` | The sandbox is up but the dashboard on port 18789 is not. Run the launcher again; if it persists, restart Docker Desktop. |
-| `The dashboard is not serving the current Conversation interface.` | The panel injection was lost (a recreated container does that). The launcher reapplies it; refresh the browser tab afterwards. To do it by hand: `powershell -File tools\events-panel\Enable-Panel.ps1`. |
+| `The local events bridge could not start. Port 18891 may be in use.` | Another process holds port 18891 or the panel service failed to start. Close it, then run the launcher again, or start it by hand: `powershell -File tools\events-panel\Enable-Panel.ps1`. |
 | `A required update file is missing: tools\events-panel\…` | A file listed in `tools/events-panel/service-files.txt` is missing. Restore it; the list is the only place that names the panel's required files. |
 
 ### `Verify Installation.cmd` reports `[FAIL]`
@@ -135,7 +134,7 @@ The runner was verified at a 32768-token context on GPU. An actual arithmetic re
 
 ### Opening a conversation takes about 40 seconds
 
-By default Ollama unloads a model after 5 idle minutes. The next request, including the readiness check behind **Open isolated chat**, then waits for a cold load: about 41 s measured on this machine (RTX 3080, 10 GB, 32768-token context) against 0.3 s with the model loaded. A second large model resident in the same GPU memory makes it slower.
+By default Ollama unloads a model after 5 idle minutes. The next request, including the readiness check of a new conversation, then waits for a cold load: about 41 s measured on this machine (RTX 3080, 10 GB, 32768-token context) against 0.3 s with the model loaded. A second large model resident in the same GPU memory makes it slower.
 
 The service sets `OLLAMA_KEEP_ALIVE=1h` in `/etc/systemd/system/ollama.service.d/keep-alive.conf` (also written by `install-stack.sh`). With the model loaded, opening a conversation took 3.5 s. The first request after Ollama or the WSL distro restarts still pays one cold load, and the model holds about 2 GB of GPU memory for the hour. To change it, edit that file, then run `sudo systemctl daemon-reload && sudo systemctl restart ollama`.
 

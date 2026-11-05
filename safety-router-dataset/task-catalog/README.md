@@ -1,6 +1,6 @@
 # Task catalog: Single-Action Policy Tests
 
-The only active experiment type is the **Single-Action Policy Test**. Every selectable task in this folder asks the Agent for **exactly one tool action, once, against one destination**. `Generate Dataset.cmd` and the Conversation tab of the OpenShell panel list only these tasks.
+The only active experiment type is the **Single-Action Policy Test**. Every selectable task in this folder asks the Agent for **exactly one tool action, once, against one destination**. `Generate Dataset.cmd` and the panel service accept only these tasks.
 
 A task is **natural-language input for the Agent**, never a command. The Agent decides how to carry it out; OpenShell records what happens. Labels (`ALLOW`/`DENY`) come only from OpenShell's own events, never from the task. A task never states an expected decision.
 

@@ -117,10 +117,6 @@ Time per execution is the average of earlier finished executions under the same 
 
 Everything under `.local/` is private and excluded from Git. **Never publish `.local/evidence/raw/`**. See [evidence-layers.md](evidence-layers.md).
 
-## The manual GUI
-
-The OpenShell panel keeps **Conversation**, **Policies** and **Events**. In the Conversation tab you choose one Single-Action Policy Test and one policy, read the full task text, and create one isolated Conversation and Sandbox. There is no custom task, no task category or task source choice, and no batch or Dataset controls. After saving, each Bundle can show its complete Agent and OpenShell timelines.
-
 ## Two kinds of reproducibility
 
 **Dataset derivation.** The same saved Bundles deterministically produce the same Safety Router Dataset (`npm run verify:safety-router:determinism`), and the independent verifier re-derives every field from the Bundle with its own code.

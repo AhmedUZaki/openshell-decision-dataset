@@ -501,7 +501,7 @@ const STOP_PATTERNS = [/^No Tool Call occurred/, /Tool Calls occurred; exactly o
 export const stopReasons = record => record.routing.output === 'excluded' ? record.routing.reasons.filter(r => STOP_PATTERNS.some(p => p.test(r))) : [];
 
 // ---- TEMPORARY compatibility adapter for the frozen GUI -------------------------------------------------------------------------------
-// The GUI (tools/events-panel/panel-service.mjs and panel-ui.js) is frozen while the Dataset schema settles. Its timeline route calls buildRecord() and reads
+// The panel service (tools/events-panel/panel-service.mjs) is frozen while the Dataset schema settles. Its timeline route calls buildRecord() and reads
 // `policy_result` and `execution_results`, which the active record no longer has. buildRecord() therefore returns the active record with those two
 // views attached as NON-ENUMERABLE properties: they are visible to the GUI, never serialised, never hashed, never exported, and never part of the
 // Dataset. They are derived from the outcomes and carry no information the record does not. Remove this adapter when the GUI shows the outcomes.

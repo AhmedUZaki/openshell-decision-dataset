@@ -3,23 +3,12 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $localDir = Join-Path $projectRoot '.local'
 $stateFile = Join-Path $localDir 'openshell-panel-state.json'
-$docker = 'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
-$uiRoot = '/usr/local/lib/nemoclaw/openclaw-runtime/node_modules/openclaw/dist/control-ui'
 
 function Assert-NativeSuccess {
     if ($LASTEXITCODE -ne 0) { throw 'An OpenShell panel setup command failed.' }
 }
 
-$containers = @(& $docker ps --format '{{.Names}}' | Where-Object { $_ -match '^openshell-default--my-assistant-[0-9a-f-]{36}$' })
-Assert-NativeSuccess
-if ($containers.Count -ne 1) { throw 'Expected one running my-assistant sandbox. Start OpenClaw first.' }
-$containerName = $containers[0]
-& $docker cp (Join-Path $PSScriptRoot 'patch-dashboard-ui.py') "${containerName}:/tmp/openshell-panel-patch.py" | Out-Null
-Assert-NativeSuccess
-
 if ($Remove) {
-    & $docker exec -u 0 $containerName python3 /tmp/openshell-panel-patch.py --remove
-    Assert-NativeSuccess
     if (Test-Path -LiteralPath (Join-Path $localDir 'openshell-panel.pid')) {
         $bridgePid = [int](Get-Content -LiteralPath (Join-Path $localDir 'openshell-panel.pid'))
         $bridgeProcess = Get-CimInstance Win32_Process -Filter "ProcessId=$bridgePid" -ErrorAction SilentlyContinue
@@ -27,7 +16,7 @@ if ($Remove) {
             Stop-Process -Id $bridgePid
         }
     }
-    Write-Host 'Panel removed. Refresh the dashboard.'
+    Write-Host 'Panel service stopped.'
     return
 }
 
@@ -97,11 +86,4 @@ if (-not $bridgeReady) {
 }
 if (-not $bridgeReady) { throw 'The local events bridge could not start. Port 18891 may be in use.' }
 
-$template = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'panel-ui.js'))
-$clientPath = Join-Path $localDir 'openshell-events-panel.js'
-[IO.File]::WriteAllText($clientPath, $template.Replace('__OPENSHELL_PANEL_CAPABILITY__', $state.capability).Replace('__OPENSHELL_SANDBOX_NAME__', 'my-assistant'), [Text.UTF8Encoding]::new($false))
-& $docker cp $clientPath "${containerName}:${uiRoot}/assets/openshell-events-panel.js" | Out-Null
-Assert-NativeSuccess
-& $docker exec -u 0 $containerName python3 /tmp/openshell-panel-patch.py
-Assert-NativeSuccess
-Write-Host 'OpenShell events panel ready. Refresh the existing chat page.' -ForegroundColor Green
+Write-Host 'OpenShell panel service ready (port 18891).' -ForegroundColor Green

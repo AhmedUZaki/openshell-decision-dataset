@@ -14,8 +14,7 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 | Step | Do this | Details |
 | --- | --- | --- |
 | 1. Install | Double-click `Install Everything.cmd` (it installs Ubuntu on WSL 2, Docker Desktop and Node.js with winget when missing, then the pinned stack), then `Verify Installation.cmd` | [Portable rebuild](docs/setup.md#portable-rebuild-and-private-backup) (automatic), [Installation](docs/setup.md#installation) (manual equivalent) |
-| 2. Try one test by hand | Double-click `Start OpenClaw.cmd`. In the OpenShell panel, open the **Conversation** tab, pick one Single-Action Policy Test and one policy, create the conversation, talk to the Agent, then **Save task bundle** or **Close conversation** | [safety-router-dataset/README.md](safety-router-dataset/README.md), [docs/panel.md](docs/panel.md#isolated-conversations-and-evidence-bundles) |
-| 2b. Or collect in bulk | Double-click `Generate Dataset.cmd`, press 1 (Collect new data), then 1 in the collector menu: choose policies, tests and the number of independent executions, review the calculation, type `RUN`. It ends with export, validation and verification of the Safety Router Dataset | [docs/dataset/collecting-data.md](docs/dataset/collecting-data.md), [tasks](safety-router-dataset/task-catalog/README.md) |
+| 2. Collect data | Double-click `Generate Dataset.cmd`, press 1 (Collect new data), then 1 in the collector menu: choose policies, tests and the number of independent executions, review the calculation, type `RUN`. It ends with export, validation and verification of the Safety Router Dataset | [docs/dataset/collecting-data.md](docs/dataset/collecting-data.md), [tasks](safety-router-dataset/task-catalog/README.md) |
 | 3. Create the Dataset | `Generate Dataset.cmd` option 2, Create Dataset (or `npm run create:dataset`): builds, validates, verifies independently and saves a NEW folder named with its UTC creation time under `.local/safety-router/datasets/` | [docs/dataset/safety-router-dataset.md](docs/dataset/safety-router-dataset.md) |
 
 > **License: MIT** (code and documentation). See [LICENSE](LICENSE) and [docs/license-choice.md](docs/license-choice.md); a released dataset needs its own terms.
@@ -26,7 +25,7 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 Install Everything.cmd   Start OpenClaw.cmd   Verify Installation.cmd   Generate Dataset.cmd
 Run Tests.cmd            package.json (npm test, validation scripts)
 setup/     the environment: pins.env (every version in one file), installer, verifier, checksums.json, Generate-Dataset.ps1
-tools/     launchers/ (starts everything), events-panel/ (OpenShell side panel + conversation manager) and integrity-check/ (source checksums)
+tools/     launchers/ (starts everything), events-panel/ (the local OpenShell panel service: conversation manager and evidence) and integrity-check/ (source checksums)
 safety-router-dataset/   source code and schemas only: task-catalog/ (the 12 Single-Action Policy Tests), collect-data/ (Generate Dataset.cmd), create-dataset/ (build, validate, verify, schemas), release-checks/ (secret and path scans)
 tests/     automated tests; run them with npm test or Run Tests.cmd
 docs/      documentation; docs/dataset/ is the methodology

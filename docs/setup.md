@@ -178,14 +178,12 @@ Double-click "Start OpenClaw.cmd" in the project folder.
 
 The launcher starts Docker Desktop if needed, checks Ubuntu Docker integration,
 starts the existing Ollama and managed gateway services, runs NemoClaw recovery
-checks, installs the current Conversation/Policies/Events panel, verifies its API,
-and opens the authenticated local dashboard on the Conversation tab in your browser.
+starts the current OpenShell panel service (the collector needs it) and opens the
+authenticated local OpenClaw dashboard in your browser.
 
-Use New conversation to create an isolated sandbox for each experiment.
-Use Open isolated chat on an existing card to recover that conversation environment.
-Use Save task bundle inside its main chat after the task completes. Private
-captures are stored under .local/task-captures in the project folder.
-The launcher does not create, delete or reset conversations automatically.
+Collect data with Generate Dataset.cmd. Private captures are stored under
+.local/task-captures in the project folder. The launcher does not create, delete
+or reset conversations automatically.
 
 The dashboard token is retrieved at runtime and is not saved in these files.
 No software is installed, no files are deleted, and no network policy is changed.

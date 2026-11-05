@@ -68,7 +68,7 @@ test('closing saves first and stops the sandbox only after a successful save',as
   await assert.rejects(m.close(a),/still active/);assert.equal(calls.length,0,'not stopped when the save failed');assert.equal(m.items[0].closedAt,undefined);
   m.save=async()=>({captureId:'capture-x',eventCount:3,toolCallCount:1});
   const result=await m.close(a);assert.equal(result.closed,a);assert.deepEqual(calls,[`${a} stop`]);assert.ok(m.items[0].closedAt);assert.ok(m.list()[0].closedAt);
-  calls.length=0;m.nemo=async args=>{calls.push(args.join(' '));return 'http://127.0.0.1:19000/#token=t';};m.install=async()=>({});
+  calls.length=0;m.nemo=async args=>{calls.push(args.join(' '));return 'http://127.0.0.1:19000/#token=t';};m.containerOf=async()=>({docker:'docker',container:'c'});
   await m.open(a);assert.equal(calls[0],`${a} start`,'reopening starts the stopped sandbox first');assert.equal(m.items[0].closedAt,undefined);
 }finally{rmSync(root,{recursive:true});}});
 test('extra Balanced presets come from pins.env and only plain names are accepted',()=>{const {root,m}=manager();try{assert.deepEqual(m.extraPresets(),[]);mkdirSync(join(root,'setup'));writeFileSync(join(root,'setup','pins.env'),'MODEL=x\nPOLICY_EXTRA_PRESETS=brave, tavily ,bad name;rm,../x\n');assert.deepEqual(m.extraPresets(),['brave','tavily']);}finally{rmSync(root,{recursive:true});}});
@@ -81,7 +81,7 @@ test('environment record carries the pins, versions and model digest and tolerat
 test('a conversation is created with the policy tier it asks for, and the Balanced extras apply to Balanced only',async()=>{
   const make=async(request)=>{const {root,m}=manager();mkdirSync(join(root,'setup'));writeFileSync(join(root,'setup','pins.env'),'POLICY_TIER=balanced\nPOLICY_EXTRA_PRESETS=brave\n');
     const calls=[];m.nemo=async(args,extra=[])=>{calls.push({args,extra});return 'creation log';};
-    m.shell=async args=>args[0]==='sandbox'?JSON.stringify({id:'4fdb7d21-17d5-4d4b-87f3-37f38d28b7bc'}):JSON.stringify({version:3,hash:'h'});m.install=async()=>({});
+    m.shell=async args=>args[0]==='sandbox'?JSON.stringify({id:'4fdb7d21-17d5-4d4b-87f3-37f38d28b7bc'}):JSON.stringify({version:3,hash:'h'});m.containerOf=async()=>({docker:'docker',container:'c'});
     m.taskRefFor=()=>({task_source:'task_catalog',task_id:'fetch-test-task',task_version:1,task_hash:'h',category:'single-action-policy-tests',title:'t',task:'run it'});
     const started=m.create({title:'t',task:'run it',...request});
     for(let i=0;i<50&&m.items[0].status==='creating';i++)await new Promise(r=>setTimeout(r,5));
@@ -120,7 +120,7 @@ function catalogManager(tasks = { 'read-a-page.json': catalogTask() }) {
   ctx.put = (name, task) => writeFileSync(join(dir, 'web-research', name), JSON.stringify(task));
   return ctx;
 }
-const stubCreation = m => { m.nemo = async () => ''; m.install = async () => ({}); m.shell = async args => args[0] === 'sandbox' ? JSON.stringify({ id: '11111111-1111-1111-1111-111111111111' }) : JSON.stringify({ version: 1, hash: 'h' }); };
+const stubCreation = m => { m.nemo = async () => ''; m.containerOf = async () => ({ docker: 'docker', container: 'c' }); m.shell = async args => args[0] === 'sandbox' ? JSON.stringify({ id: '11111111-1111-1111-1111-111111111111' }) : JSON.stringify({ version: 1, hash: 'h' }); };
 test('only autonomous conversations can be created; fixed-action and unknown modes are refused', () => {
   const { root, m } = catalogManager();
   try {
@@ -195,7 +195,7 @@ async function savedBundle({ execution = null, source = 'task_catalog', log = nu
   m.verify = async () => ({});
   m.sessions = async () => [{ key: 'agent:main:main', status: 'done', sessionId: 's1', updatedAt: 1 }];
   m.nemo = async args => args.includes('--version') ? 'nemoclaw 0.0.140' : '';
-  m.install = async () => ({ docker: 'docker', container: 'c' });
+  m.containerOf = async () => ({ docker: 'docker', container: 'c' });
   m.shell = async args => {
     if (args[0] === '--version') return 'openshell 0.0.116';
     if (args[0] === 'logs') return text;

@@ -1,4 +1,4 @@
-// The manual GUI, the panel service and the whole project: no Dataset tab, no batch controls, no generic command execution, strict paths,
+// The panel service and the whole project: no Dataset tab, no batch controls, no generic command execution, strict paths,
 // and no test that touches Docker, WSL, OpenShell, Ollama or a real sandbox.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,28 +16,11 @@ const mjs = dir => readdirSync(resolve(root, dir)).filter(f => f.endsWith('.mjs'
 const sources = () => [...mjs('safety-router-dataset/collect-data'), ...mjs('safety-router-dataset/create-dataset'), ...mjs('tools/events-panel')];
 const tests = () => mjs('tests');
 
-test('the GUI has Conversation, Policies and Events only: no Dataset tab and no batch controls', () => {
-  const panel = text('tools/events-panel/panel-ui.js');
-  const tabs = /tabs\.innerHTML = '([^']*)'/.exec(panel)[1];
-  assert.deepEqual([...tabs.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]), ['conversation', 'policies', 'events']);
-  assert.deepEqual([...tabs.matchAll(/>([^<]+)<\/button>/g)].map(m => m[1]), ['Conversation', 'Policies', 'Events']);
-  assert.doesNotMatch(panel, /data-tab\s*=\s*'dataset'|data-tab="dataset"|loadDataset|datasetView|\/dataset\/|ds-preview|ds-start|ds-cancel/);
-  for (const word of [/Separate run/i, /Total Executions/i, /Estimated (time|disk)/i, /estimated remaining/i, /Start run/i, /Cancel after current task/i, /batch/i, /Generate Dataset/i, /Include already completed/i]) assert.doesNotMatch(panel, word, String(word));
-  assert.doesNotMatch(panel, /<select[^>]*multiple|type="number"|ds-count/i, 'no multiple-task selection and no run counts');
-  assert.doesNotMatch(panel, /dataset export|export dataset/i, 'no dataset export control');
-});
-
-test('the Conversation tab picks one Single-Action Policy Test and a policy, with no custom task, category or task-source choice', () => {
-  const panel = text('tools/events-panel/panel-ui.js');
-  for (const needle of ['Single-Action Policy Test', 'value="task_catalog"'.replace('value="task_catalog"', 'id="conversation-catalog-task"'), 'id="conversation-task-text"', 'readonly', 'id="conversation-policy"', 'value="restricted"', 'Balanced — NemoClaw default', 'value="open"', "policyRequest('/catalog')"]) assert.ok(panel.includes(needle), needle);
-  for (const gone of ['conversation-source', 'custom_manual', 'conversation-category', 'conversation-custom-box', 'Custom manual task']) assert.ok(!panel.includes(gone), `${gone} is no longer in the GUI`);
-  const section = panel.slice(panel.indexOf('// Task catalog selectors'), panel.indexOf('async function loadCaptures'));
-  assert.ok(section.length > 500);
-  assert.doesNotMatch(section, /innerHTML|insertAdjacentHTML|outerHTML|eval\(/, 'task data is shown with textContent and option nodes only');
-  assert.match(section, /textContent=task\.title/);
-  // the browser names the task; the server owns its text, version and hash
-  assert.match(panel, /body=\{taskSource:'task_catalog',taskId:[^,}]*,policyTier:[^}]*\}/);
-  assert.doesNotMatch(panel, /taskSource:'task_catalog'[^}]*task_text|task_hash:/);
+test('there is no GUI: the panel is a local service only, and nothing injects a script into a sandbox dashboard', () => {
+  for (const gone of ['tools/events-panel/panel-ui.js', 'tools/events-panel/patch-dashboard-ui.py']) assert.equal(existsSync(resolve(root, gone)), false, `${gone} was removed`);
+  const conv = text('tools/events-panel/conversations.mjs'), enable = text('tools/events-panel/Enable-Panel.ps1'), launcher = text('tools/launchers/Start-OpenClaw.ps1');
+  for (const [name, src] of [['conversations.mjs', conv], ['Enable-Panel.ps1', enable], ['Start-OpenClaw.ps1', launcher]]) assert.doesNotMatch(src, /panel-ui|patch-dashboard-ui|openshell-events-panel|control-ui\/assets/, name);
+  assert.match(conv, /async containerOf\(item\)/, 'the conversation container identity is still verified');
 });
 test('the catalog route lists only selectable tasks from safety-router-dataset/task-catalog, read-only, for the main panel, behind the capability and origin checks', () => {
   const server = text('tools/events-panel/panel-service.mjs');

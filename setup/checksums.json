@@ -57,7 +57,7 @@
     },
     {
       "path": "safety-router-dataset/README.md",
-      "sha256": "db3bfc4af91eaabccd9aff77dea3385b7174ba0cb0672c8c68cf286fd314d1ac"
+      "sha256": "5bb162ceb2753b7810f72a0b30f615dc3054402db1ab52b73682e71a2084da09"
     },
     {
       "path": "safety-router-dataset/collect-data/collection-runner.mjs",
@@ -133,7 +133,7 @@
     },
     {
       "path": "safety-router-dataset/task-catalog/README.md",
-      "sha256": "1c1f288e0d35c775c8fabc17378196e84a95f33c10b095e0a89853443c2f5671"
+      "sha256": "f3065cf0946b9e75c82bcb23b4c871b9068ff0fd6fa4d568c872057e0d3e76de"
     },
     {
       "path": "safety-router-dataset/task-catalog/catalog.json",
@@ -217,11 +217,11 @@
     },
     {
       "path": "tools/events-panel/Enable-Panel.ps1",
-      "sha256": "8f4eb2adf3df2cb59a69db0a77936d3ae111794650e83514ce87cf84fcc9fa97"
+      "sha256": "85f1791570dfb1729a6b7dee260639844b203613b94866f218b16ea091313d5a"
     },
     {
       "path": "tools/events-panel/conversations.mjs",
-      "sha256": "0d25269cded73e5f3156b890d38e8878e124dcdaf01947535f183fb6d4b5e889"
+      "sha256": "60cfa1315e75ce2994f69323941d74bccb4ef5cbe41aeea637eaa0c50944e35e"
     },
     {
       "path": "tools/events-panel/evidence.mjs",
@@ -234,14 +234,6 @@
     {
       "path": "tools/events-panel/panel-service.mjs",
       "sha256": "1c403e5581177badc944a401c966225a69a735635590eefc1c73d3286e127da7"
-    },
-    {
-      "path": "tools/events-panel/panel-ui.js",
-      "sha256": "1446eb2301c975fdcbe4e35c7cb6e59f63247ef75ba63fffaa3c593c9f0f92a6"
-    },
-    {
-      "path": "tools/events-panel/patch-dashboard-ui.py",
-      "sha256": "d33fc2e6fc9e14b03b5b9866b978dbfc287b8e80343d7b0ef72040308e00891a"
     },
     {
       "path": "tools/events-panel/policy-labels.mjs",
@@ -257,7 +249,7 @@
     },
     {
       "path": "tools/events-panel/single-action-record.mjs",
-      "sha256": "a45ecc53d2af452a7e33b7f234d3be87651be5f525b9c2bce54a5999b42ebd15"
+      "sha256": "fad7aee2a7cfe376111f13b9b0041d80910f57730d03e43e2d08352e81e98b0a"
     },
     {
       "path": "tools/events-panel/source-identity.mjs",
@@ -273,7 +265,7 @@
     },
     {
       "path": "tools/launchers/Start-OpenClaw.ps1",
-      "sha256": "f316c00fc2ae7a12f3317fb37c7e72f0f9caf753fcc9b5c59aa4227bfbacc776"
+      "sha256": "b3d86ba0537143f30b7595fb976fd6c8b6e913cd15c41d112362a2ccb464a74b"
     }
   ]
 }

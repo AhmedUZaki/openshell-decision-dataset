@@ -64,17 +64,6 @@ export class ConversationManager {
     if(names.length!==1)throw Error('The conversation container identity could not be verified.');
     return {docker,container:names[0]};
   }
-  async install(item){
-    const {docker,container}=await this.containerOf(item);
-    const names=[container];
-    const generated=resolve(this.root,'.local',`${item.id}-panel.js`);
-    const script=readFileSync(resolve(this.root,'tools/events-panel/panel-ui.js'),'utf8').replaceAll('__OPENSHELL_PANEL_CAPABILITY__',this.state.capability).replaceAll('__OPENSHELL_SANDBOX_NAME__',item.id);
-    writeFileSync(generated,script);
-    await this.run(docker,['cp',generated,`${names[0]}:/usr/local/lib/nemoclaw/openclaw-runtime/node_modules/openclaw/dist/control-ui/assets/openshell-events-panel.js`],{windowsHide:true});
-    await this.run(docker,['cp',resolve(this.root,'tools/events-panel/patch-dashboard-ui.py'),`${names[0]}:/tmp/openshell-panel-patch.py`],{windowsHide:true});
-    await this.run(docker,['exec','-u','0',names[0],'python3','/tmp/openshell-panel-patch.py'],{windowsHide:true});
-    return {docker,container:names[0]};
-  }
   // The policy tier a new conversation is created with: one of NemoClaw's own tiers. Personal is not offered: NemoClaw does not apply it to a sandbox whose model endpoint is an attached provider (ours).
   tierFor(requested){
     const tier=String(requested??this.pins().POLICY_TIER??'balanced').trim().toLowerCase();
@@ -141,7 +130,7 @@ export class ConversationManager {
         if(policyTier==='balanced')for(const preset of this.extraPresets())await this.nemo([item.id,'policy','add',preset,'--yes'],[],300000);
         const identity=JSON.parse(await this.shell(['sandbox','get',item.id,'--output','json']));item.sandboxId=identity.id;
         if(!/^[0-9a-f-]{36}$/.test(item.sandboxId))throw Error('Invalid sandbox identity.');
-        await this.install(item);
+        await this.containerOf(item);   // the container must be this conversation's own sandbox
         item.initialPolicy=JSON.parse(await this.shell(['policy','get',item.id,'--full','--output','json']));
         item.policyCheck={at:'creation',checked_at:new Date().toISOString(),version:item.initialPolicy.version??null,hash:item.initialPolicy.hash??null};
         item.status='ready';item.message='Ready. Open the conversation and use its main conversation only.';
@@ -163,7 +152,7 @@ export class ConversationManager {
     item.closedAt=new Date().toISOString();this.persist();
     return {closed:id,...saved};
   }
-  async open(id){const item=this.item(id);if(item.status!=='ready')throw Error('The conversation sandbox is not ready.');await this.verify(item);if(item.closedAt){await this.nemo([item.id,'start'],[],600000);delete item.closedAt;this.persist();}await this.nemo([item.id,'connect','--probe-only'],[],240000);await this.install(item);const output=await this.nemo([item.id,'dashboard-url','--quiet']);const url=output.split(/\r?\n/).find(line=>line.startsWith(`http://127.0.0.1:${item.port}/`));if(!url)throw Error('Expected local dashboard URL was not returned.');return {url};}
+  async open(id){const item=this.item(id);if(item.status!=='ready')throw Error('The conversation sandbox is not ready.');await this.verify(item);if(item.closedAt){await this.nemo([item.id,'start'],[],600000);delete item.closedAt;this.persist();}await this.nemo([item.id,'connect','--probe-only'],[],240000);await this.containerOf(item);const output=await this.nemo([item.id,'dashboard-url','--quiet']);const url=output.split(/\r?\n/).find(line=>line.startsWith(`http://127.0.0.1:${item.port}/`));if(!url)throw Error('Expected local dashboard URL was not returned.');return {url};}
   // Facts that let someone rebuild the environment, each read from the running system; one that cannot be read is null, never guessed.
   async reproducibility(item,{docker,container,folder}){
     const wsl=async args=>{try{return (await this.run('wsl.exe',['-d','Ubuntu-24.04','--',...args],{timeout:30000,maxBuffer:1024*1024,windowsHide:true})).stdout;}catch{return null;}};
@@ -302,7 +291,7 @@ export class ConversationManager {
       const mainAfter=sessionsAfter.find(s=>s.key===item.sessionKey);
       if(sessionsAfter.some(s=>s.key!==item.sessionKey)||!mainAfter||mainAfter.status!==mainBefore.status||mainAfter.sessionId!==mainBefore.sessionId||mainAfter.updatedAt!==mainBefore.updatedAt||exported.sessionId!==mainBefore.sessionId)throw Error('The conversation changed during export. Wait until it is idle and save again.');
       if(exported.outputDir!==`/sandbox/.openclaw/trajectory-exports/${captureId}`)throw Error('Unexpected trajectory export path.');
-      ({docker,container}=await this.install(item));
+      ({docker,container}=await this.containerOf(item));
     }
     const folder=resolve(this.root,'.local/task-captures',captureId);mkdirSync(folder,{recursive:true});
     await this.run(docker,['cp',`${container}:${exported.outputDir}`,resolve(folder,'trajectory')],{windowsHide:true});

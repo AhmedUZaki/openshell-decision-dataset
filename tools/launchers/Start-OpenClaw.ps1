@@ -18,7 +18,7 @@ try {
     $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     $panelDir = Join-Path $projectRoot 'tools\events-panel'
     $serviceFiles = @(Get-Content -LiteralPath (Join-Path $panelDir 'service-files.txt') | Where-Object { $_.Trim() })
-    foreach ($requiredFile in ($serviceFiles + 'service-files.txt', 'Enable-Panel.ps1', 'panel-ui.js', 'patch-dashboard-ui.py')) {
+    foreach ($requiredFile in ($serviceFiles + 'service-files.txt', 'Enable-Panel.ps1')) {
         if (-not (Test-Path -LiteralPath (Join-Path $panelDir $requiredFile))) { throw "A required update file is missing: tools\events-panel\$requiredFile" }
     }
     if (-not (Test-Path -LiteralPath $dockerDesktopExe)) {
@@ -82,23 +82,18 @@ try {
     if ($dashboardResponse.StatusCode -ne 200) { throw 'The local dashboard is not responding.' }
 
     $panelSetup = Join-Path $projectRoot 'tools\events-panel\Enable-Panel.ps1'
-    Write-Host 'Loading the latest OpenShell Conversation, Policies, and Events interface...'
+    Write-Host 'Starting the latest OpenShell panel service...'
     & $panelSetup
     $localPanelState = Get-Content -LiteralPath (Join-Path $projectRoot '.local\openshell-panel-state.json') -Raw | ConvertFrom-Json
     $panelHeaders = @{ 'X-OpenShell-Panel' = $localPanelState.capability; Origin = 'http://127.0.0.1:18789' }
     $conversationState = Invoke-RestMethod -Uri 'http://127.0.0.1:18891/conversations/list' -Headers $panelHeaders -TimeoutSec 10
     $readyCount = @($conversationState.items | Where-Object status -eq 'ready').Count
-    $panelAsset = Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:18789/assets/openshell-events-panel.js' -TimeoutSec 10
-    if (-not $panelAsset.Content.Contains('New conversation') -or -not $panelAsset.Content.Contains('Save task bundle')) { throw 'The dashboard is not serving the current Conversation interface.' }
-    Write-Host "Conversation workspace ready. Saved conversations: $readyCount"
-    $launchUrl = [UriBuilder]::new($dashboardUrl[0])
-    $launchUrl.Query = 'openshell-panel=conversation'
+    Write-Host "Panel service ready. Saved conversations: $readyCount"
 
     if (-not $CheckOnly) {
-        Start-Process -FilePath $launchUrl.Uri.AbsoluteUri
+        Start-Process -FilePath $dashboardUrl[0]
         Write-Host 'OpenClaw is ready. The dashboard has opened in your browser.' -ForegroundColor Green
-        Write-Host 'Use OpenShell > Conversation to create isolated conversations and save task bundles.'
-        Write-Host 'Open an existing conversation from its card. You can close this window.'
+        Write-Host 'Collect data with Generate Dataset.cmd. You can close this window.'
     } else {
         Write-Host 'Startup checks passed. Browser opening was skipped.' -ForegroundColor Green
     }
