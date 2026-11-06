@@ -109,4 +109,4 @@ done
 log "Verifying the recreated stack"
 nemoclaw "$SANDBOX_NAME" connect --probe-only
 ollama list | grep -F "$MODEL" >/dev/null || fail "The configured model is missing."
-log "Installation completed successfully. Return to Windows and run Start OpenClaw.cmd."
+log "Installation completed successfully. Return to Windows and run Start OpenClaw Workspace.cmd."

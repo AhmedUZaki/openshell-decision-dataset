@@ -16,12 +16,12 @@ const mjs = dir => readdirSync(resolve(root, dir)).filter(f => f.endsWith('.mjs'
 const sources = () => [...mjs('safety-router-dataset/collect-data'), ...mjs('safety-router-dataset/create-dataset'), ...mjs('tools/events-panel')];
 const tests = () => mjs('tests');
 
-test('the OpenShell panel is read-only and goes into the shared my-assistant dashboard only, never into a conversation sandbox', () => {
+test('the OpenShell panel is read-only except the policy tier switch, and goes into the shared my-assistant dashboard only, never into a conversation sandbox', () => {
   const ui = text('tools/events-panel/panel-ui.js'), conv = text('tools/events-panel/conversations.mjs'), enable = text('tools/events-panel/Enable-Panel.ps1');
   // Tabs: Agent activity, OpenShell events, Policy. No collection, Dataset, save or delete controls.
   assert.deepEqual([...ui.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]), ['activity', 'events', 'policy']);
   const routes = [...ui.matchAll(/call\('(\/[a-z/]+)'/g)].map(m => m[1]).sort();
-  assert.deepEqual(routes, ['/agent/activity', '/events', '/policy'], 'only the read-only routes');
+  assert.deepEqual(routes, ['/agent/activity', '/events', '/policy', '/policy/tier', '/policy/tier/set'], 'the read-only routes and the confirmed tier switch');
   assert.doesNotMatch(ui, /conversations\/|\/catalog|\/dataset|Generate Dataset|deleteBundles/);
   // Chat data is drawn with textContent only: the one innerHTML is the fixed template, before any data arrives.
   assert.equal((ui.match(/innerHTML|insertAdjacentHTML|outerHTML|eval\(|new Function/g) || []).length, 1);

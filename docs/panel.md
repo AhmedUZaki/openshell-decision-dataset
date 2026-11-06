@@ -2,24 +2,33 @@
 
 Two parts:
 
-- **The OpenShell panel in the dashboard**: a read-only side panel in the `my-assistant` OpenClaw dashboard for trying the Agent by hand. You chat as usual; the panel shows what the Agent did.
+- **The OpenShell panel in the dashboard**: a side panel in the `my-assistant` OpenClaw dashboard for trying the Agent by hand. You chat as usual; the panel shows what the Agent did. Its only control is the policy tier switch in the Policy tab.
 - **The panel service**: the local service behind it. It also creates the isolated conversations (one Sandbox per execution), saves their evidence as Bundles and builds the Safety Router records for `Generate Dataset.cmd`.
 
 ## OpenShell panel in the dashboard
 
-`Start OpenClaw.cmd` adds the panel to the `my-assistant` dashboard at `http://127.0.0.1:18789/` (by hand: `Enable-Panel.ps1`; `-Remove` takes it out again). It opens on the right of the chat; **×** hides it and the **OpenShell** button brings it back. It has three tabs:
+`Start OpenClaw Workspace.cmd` adds the panel to the `my-assistant` dashboard at `http://127.0.0.1:18789/` (by hand: `Enable-Panel.ps1`; `-Remove` takes it out again). It opens on the right of the chat; **×** hides it and the **OpenShell** button brings it back. It has three tabs:
 
 | Tab | Shows |
 |---|---|
 | **Agent activity** | The chat in order: your messages, the Agent's replies (and model errors), and every tool call with its arguments, its result, the OpenShell decision logged for it and the OpenShell events during the call. **Latest chat** follows the most recently updated session; the list picks another. **Live** refreshes it every 5 s. |
 | **OpenShell events** | The sandbox's recent OpenShell events (network, HTTP, process, filesystem) with ALLOWED/DENIED/OBSERVED. Sandbox-wide: not tied to one call. |
-| **Policy** | The policy the sandbox runs: the network policies with their hosts and programs, the filesystem policy, process and Landlock. |
+| **Policy** | The policy tier (Restricted, Balanced, Open, or Custom when the presets were changed by hand) with a switch, then the policy the sandbox runs: the network policies with their hosts and programs, the filesystem policy, process and Landlock. |
+
+### Switching the policy tier
+
+The Policy tab shows the sandbox's tier and one button per other tier. A click asks you to confirm, listing the presets it will add and remove. NemoClaw has no "change tier" command (a tier is a list of presets in its `tiers.yaml`), so the service reads that list and the sandbox's applied presets (`nemoclaw my-assistant policy list`), then applies the difference with NemoClaw's own `policy add <preset> --yes` and `policy remove <preset> --yes`. Only presets that belong to a tier are ever removed: presets outside every tier (for example `openclaw-pricing`) and your own are left alone. Personal is not offered. The change applies to new connections at once.
+
+- **Routes.** `GET /policy/tier` reads; `POST /policy/tier/set` (`{tier, confirm: true}`) changes. Both need the panel capability and a dashboard origin.
+- **Dataset sandboxes are locked.** A sandbox made by `Generate Dataset.cmd` belongs to one execution whose policy must stay unchanged; the service refuses to switch it.
+- **Every switch is recorded** in `.local/policy-edits.jsonl` (time, sandbox, from and to tier, presets added and removed, what completed), including a switch that stopped half way. An edited conversation also keeps the change in its own record, and saving its evidence still compares its policy with the creation snapshot, so it cannot pass as unchanged.
+- **The shared chat is not evidence.** Changing the tier of `my-assistant` is for trying the Agent by hand; collect data only with `Generate Dataset.cmd`.
 
 How the activity is read (`POST /agent/activity`, main dashboard origin only): the service lists the sandbox's sessions with `openclaw sessions --json`, exports the chosen one with OpenClaw's own `openclaw sessions export-trajectory` into a fixed temporary folder inside the sandbox (`trajectory-exports/openshell-panel-live`), reads its `events.jsonl` and removes the folder. A session that has not changed is not exported again. Tool calls are matched to OpenShell events with the same rules as saved Bundles ([tool-call records](#tool-call-records)), from the last 3000 sandbox log lines.
 
 What it is not:
 
-- **Read-only.** It changes no policy and saves nothing on Windows. It never touches the isolated `conv-…` sandboxes.
+- **Read-only, except the tier switch.** The one thing it can change is the policy tier of `my-assistant` (above); it saves nothing on Windows and never touches the isolated `conv-…` sandboxes.
 - **Not evidence.** `my-assistant` is shared by every chat, so background traffic can appear. A decision is shown only when OpenShell logged one for that call's host in the call's time window; "No OpenShell decision" means none was logged, not that the call was allowed. Tools without a `url` argument (for example `browser` with `targetUrl`) get no decision. For evidence, use `Generate Dataset.cmd`.
 - **Private.** The chat text appears in the browser only; the panel script carries the local capability token, like the service's other clients.
 
@@ -29,7 +38,7 @@ What it is not:
 
 ### Start and stop
 
-`Start OpenClaw.cmd` starts the service (and the rest of the stack). `Generate Dataset.cmd` also needs it running; its preflight checks the service answers at the expected build. To start it by hand after the sandbox is running:
+`Start OpenClaw Workspace.cmd` starts the service (and the rest of the stack). `Generate Dataset.cmd` also needs it running; its preflight checks the service answers at the expected build. To start it by hand after the sandbox is running:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\tools\events-panel\Enable-Panel.ps1"
@@ -50,7 +59,7 @@ Configuration records, SSH relays and dashboard loopback noise are excluded. Not
 - The API permits only the expected local origin and requires a random local capability header (kept in `.local/`). Host checks reject DNS rebinding. Mutations additionally require that exact Origin header, JSON input, and explicit confirmation for close and delete. Commands are fixed argument arrays, without a shell or arbitrary executable selection.
 - Local runtime state is under `.local/`, ignored by Git. Never upload that folder or raw private logs.
 - Common token/password patterns and URL queries/fragments are redacted from stored text. This is a conservative filter, not a complete sensitive-data detector.
-- The service source is hashed (`service-files.txt`); `Start OpenClaw.cmd` restarts a service whose build differs from the source on disk, and the collector's preflight checks that the running service has the expected build.
+- The service source is hashed (`service-files.txt`); `Start OpenClaw Workspace.cmd` restarts a service whose build differs from the source on disk, and the collector's preflight checks that the running service has the expected build.
 
 ### Check parser behavior
 
@@ -131,7 +140,7 @@ Saving does not derive any Dataset. The Safety Router records are built from the
 
 ### Updates take effect on the next start
 
-`Start OpenClaw.cmd` hashes the panel service's source files and compares the result with the build hash the running service reports. If they differ, it restarts the service with the new code automatically. If a conversation sandbox is still being created, the launcher keeps the running service and tells you to start again once creation finishes, so the creation is not interrupted.
+`Start OpenClaw Workspace.cmd` hashes the panel service's source files and compares the result with the build hash the running service reports. If they differ, it restarts the service with the new code automatically. If a conversation sandbox is still being created, the launcher keeps the running service and tells you to start again once creation finishes, so the creation is not interrupted.
 
 ### Resource and lifecycle boundaries
 

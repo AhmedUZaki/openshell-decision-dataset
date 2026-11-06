@@ -35,7 +35,7 @@ test('the real project tree matches setup/checksums.json', () => {
 test('every dataset-defining and runtime-critical source file is protected', () => {
   const files = new Set(listProtectedFiles(real));
   for (const f of ['setup/Install-Everything.ps1', 'setup/Verify-Installation.ps1', 'setup/Verify-Checksums.ps1', 'setup/Generate-Dataset.ps1', 'setup/wsl-linux/install-stack.sh', 'setup/pins.env',
-    'Install Everything.cmd', 'Start OpenClaw.cmd', 'Verify Installation.cmd', 'Generate Dataset.cmd', 'Run Tests.cmd', 'package.json', 'tests/run-tests.mjs',
+    'Install Everything.cmd', 'Start OpenClaw Workspace.cmd', 'Verify Installation.cmd', 'Generate Dataset.cmd', 'Run Tests.cmd', 'package.json', 'tests/run-tests.mjs',
     'tools/launchers/Start-OpenClaw.ps1', 'tools/events-panel/panel-service.mjs', 'tools/events-panel/conversations.mjs', 'tools/events-panel/evidence.mjs', 'tools/events-panel/service-files.txt', 'tools/events-panel/source-identity.mjs',
     'tools/integrity-check/source-manifest.mjs', 'safety-router-dataset/collect-data/collection-runner.mjs', 'safety-router-dataset/collect-data/task-catalog.mjs', 'safety-router-dataset/create-dataset/export-single-action-policy-tests.mjs', 'safety-router-dataset/create-dataset/validate-single-action-policy-tests.mjs', 'safety-router-dataset/create-dataset/verify-single-action-policy-tests.mjs',
     'safety-router-dataset/create-dataset/schemas/single-action-policy-test-record.schema.json', 'safety-router-dataset/create-dataset/schemas/tool-call.schema.json', 'safety-router-dataset/create-dataset/schemas/conversation.schema.json', 'safety-router-dataset/release-checks/scan.mjs', 'safety-router-dataset/task-catalog/catalog.json']) assert.ok(files.has(f), `${f} is protected`);

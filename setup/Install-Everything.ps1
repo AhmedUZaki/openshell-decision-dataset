@@ -98,7 +98,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'The OpenShell panel setup failed.' }
 
     Write-Host 'Installation and verification completed.' -ForegroundColor Green
-    Write-Host 'Double-click Start OpenClaw.cmd to open the workspace.'
+    Write-Host 'Double-click Start OpenClaw Workspace.cmd to open the workspace.'
     exit 0
 }
 catch {

@@ -141,7 +141,7 @@ export function makeContext({ root, print = null }) {
       const h = await panel('/health', null);
       if (h.status !== 200 || h.body?.service !== 'openshell-panel') throw Error(`/health returned ${h.status}; start OpenClaw.cmd first`);
       const expected = serviceBuildHash();
-      if (h.body.build !== expected) throw Error('the running panel service is not the code in this folder; run Start OpenClaw.cmd to restart it');
+      if (h.body.build !== expected) throw Error('the running panel service is not the code in this folder; run Start OpenClaw Workspace.cmd to restart it');
       const l = await panel('/conversations/list', null);
       if (l.status !== 200) throw Error(`/conversations/list returned ${l.status}`);
       items = l.body.items;

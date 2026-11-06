@@ -14,7 +14,7 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 | Step | Do this | Details |
 | --- | --- | --- |
 | 1. Install | Double-click `Install Everything.cmd` (it installs Ubuntu on WSL 2, Docker Desktop and Node.js with winget when missing, then the pinned stack), then `Verify Installation.cmd` | [Portable rebuild](docs/setup.md#portable-rebuild-and-private-backup) (automatic), [Installation](docs/setup.md#installation) (manual equivalent) |
-| 2. Try the Agent by hand | Double-click `Start OpenClaw.cmd` and chat in the dashboard. The **OpenShell** panel on the right shows each message, every tool call with its arguments and result, and the ALLOWED/DENIED decision OpenShell logged for it | [docs/panel.md](docs/panel.md#openshell-panel-in-the-dashboard) |
+| 2. Try the Agent by hand | Double-click `Start OpenClaw Workspace.cmd` and chat in the dashboard. The **OpenShell** panel on the right shows each message, every tool call with its arguments and result, and the ALLOWED/DENIED decision OpenShell logged for it | [docs/panel.md](docs/panel.md#openshell-panel-in-the-dashboard) |
 | 3. Collect data | Double-click `Generate Dataset.cmd`, press 1 (Collect new data), then 1 in the collector menu: choose policies, tests and the number of independent executions, review the calculation, type `RUN`. It ends with export, validation and verification of the Safety Router Dataset | [docs/dataset/collecting-data.md](docs/dataset/collecting-data.md), [tasks](safety-router-dataset/task-catalog/README.md) |
 | 3. Create the Dataset | `Generate Dataset.cmd` option 2, Create Dataset (or `npm run create:dataset`): builds, validates, verifies independently and saves a NEW folder named with its UTC creation time under `.local/safety-router/datasets/` | [docs/dataset/safety-router-dataset.md](docs/dataset/safety-router-dataset.md) |
 
@@ -23,7 +23,7 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 ## Layout
 
 ```text
-Install Everything.cmd   Start OpenClaw.cmd   Verify Installation.cmd   Generate Dataset.cmd
+Install Everything.cmd   Start OpenClaw Workspace.cmd   Verify Installation.cmd   Generate Dataset.cmd
 Run Tests.cmd            package.json (npm test, validation scripts)
 setup/     the environment: pins.env (every version in one file), installer, verifier, checksums.json, Generate-Dataset.ps1
 tools/     launchers/ (starts everything), events-panel/ (the OpenShell panel in the dashboard and its local service: conversation manager and evidence) and integrity-check/ (source checksums)

@@ -6,7 +6,7 @@ Daily use, where the files live and how to back them up, and what to do when som
 
 | Do this | With |
 | --- | --- |
-| Start everything (Docker Desktop, Ollama and its authentication proxy, the managed gateway, the OpenClaw sandbox, the OpenShell panel) and open the dashboard at `http://127.0.0.1:18789/` | `Start OpenClaw.cmd` |
+| Start everything (Docker Desktop, Ollama and its authentication proxy, the managed gateway, the OpenClaw sandbox, the OpenShell panel) and open the dashboard at `http://127.0.0.1:18789/` | `Start OpenClaw Workspace.cmd` |
 | Check the installation (versions against `setup/pins.env`, file checksums, Ollama, the model, the sandbox) | `Verify Installation.cmd` |
 | See what the Agent did in your chat (messages, tool calls, results, OpenShell decisions) | the **OpenShell** panel on the right of the dashboard ([panel](panel.md#openshell-panel-in-the-dashboard)) |
 | Check the launcher without opening a browser | `powershell -File tools\launchers\Start-OpenClaw.ps1 -CheckOnly` |
@@ -77,7 +77,7 @@ Create the destination directory first and ensure enough free space. Treat the e
 
 ## Troubleshooting
 
-### `Start OpenClaw.cmd` stops with "Startup failed"
+### `Start OpenClaw Workspace.cmd` stops with "Startup failed"
 
 The launcher prints the failing step and keeps the window open. It deletes nothing and installs nothing.
 
@@ -108,11 +108,11 @@ Each check is independent; the message after `[FAIL]` names the cause.
 
 Sandboxes reach Ollama only through NemoClaw's authentication proxy on `127.0.0.1:11435`. It is a plain process in Ubuntu and stops when Windows or WSL restarts; every sandbox inference request then fails with HTTP 502 and `connect` stops with `failed to verify or repair inference route: health`. `nemoclaw my-assistant doctor` shows `Ollama auth proxy is unreachable`.
 
-`Start OpenClaw.cmd` and the preflight of `Generate Dataset.cmd` now check it and start it when it is down (`tools/launchers/ensure-ollama-proxy.sh`: it starts NemoClaw's own proxy script with the token NemoClaw stored, never prints the token, and changes nothing when the proxy answers). You see `Ollama authentication proxy: running` or `started`. If it reports `could not be started`, the message names the cause (for example another process holds port 11435); run `nemoclaw my-assistant doctor` for details.
+`Start OpenClaw Workspace.cmd` and the preflight of `Generate Dataset.cmd` now check it and start it when it is down (`tools/launchers/ensure-ollama-proxy.sh`: it starts NemoClaw's own proxy script with the token NemoClaw stored, never prints the token, and changes nothing when the proxy answers). You see `Ollama authentication proxy: running` or `started`. If it reports `could not be started`, the message names the cause (for example another process holds port 11435); run `nemoclaw my-assistant doctor` for details.
 
 ### The panel says "Offline" or answers 401
 
-The panel talks to a local service on `127.0.0.1:18891`. `Offline — run Start OpenClaw.cmd to reconnect` means that service is not running (or was stopped): run `Start OpenClaw.cmd`. When the files in `tools/events-panel/` change, the launcher notices ("Panel service code changed. Restarting it...") and restarts the service itself. A `401` means the page carries an old capability token: refresh the browser tab after the launcher has finished. `Generate Dataset.cmd` also refuses to start while the running service is not the code in this folder.
+The panel talks to a local service on `127.0.0.1:18891`. `Offline — run Start OpenClaw Workspace.cmd to reconnect` means that service is not running (or was stopped): run `Start OpenClaw Workspace.cmd`. When the files in `tools/events-panel/` change, the launcher notices ("Panel service code changed. Restarting it...") and restarts the service itself. A `401` means the page carries an old capability token: refresh the browser tab after the launcher has finished. `Generate Dataset.cmd` also refuses to start while the running service is not the code in this folder.
 
 ### A conversation stays "creating", fails, or says "interrupted"
 

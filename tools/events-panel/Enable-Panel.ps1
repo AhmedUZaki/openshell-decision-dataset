@@ -64,7 +64,7 @@ if ($running -and -not $bridgeReady) {
     $creating = @()
     try { $creating = @((Invoke-RestMethod -Uri 'http://127.0.0.1:18891/conversations/list' -Headers $headers -TimeoutSec 5).items | Where-Object status -eq 'creating') } catch { }
     if ($creating.Count -gt 0) {
-        Write-Host 'A conversation sandbox is still being created, so the panel service keeps its previous code for now. Run Start OpenClaw again after creation finishes.' -ForegroundColor Yellow
+        Write-Host 'A conversation sandbox is still being created, so the panel service keeps its previous code for now. Run Start OpenClaw Workspace.cmd again after creation finishes.' -ForegroundColor Yellow
         $bridgeReady = $true
     }
 }
@@ -99,7 +99,7 @@ $docker = 'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
 $uiRoot = '/usr/local/lib/nemoclaw/openclaw-runtime/node_modules/openclaw/dist/control-ui'
 $containers = @(& $docker ps --format '{{.Names}}' | Where-Object { $_ -match '^openshell-default--my-assistant-[0-9a-f-]{36}$' })
 Assert-NativeSuccess
-if ($containers.Count -ne 1) { throw 'Expected one running my-assistant sandbox. Start OpenClaw first.' }
+if ($containers.Count -ne 1) { throw 'Expected one running my-assistant sandbox. Start OpenClaw Workspace.cmd first.' }
 $containerName = $containers[0]
 $template = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'panel-ui.js'))
 $clientPath = Join-Path $localDir 'openshell-events-panel.js'

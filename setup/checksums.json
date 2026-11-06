@@ -44,7 +44,7 @@
       "sha256": "a8b2fe48d352f9c55f157feb45993ba450873b3cc7017a4389f960a7bd8d7a46"
     },
     {
-      "path": "Start OpenClaw.cmd",
+      "path": "Start OpenClaw Workspace.cmd",
       "sha256": "8fcf936ef26ba41865e5e54fc260884d80b74b080f995f5e904bc804608c5887"
     },
     {
@@ -77,7 +77,7 @@
     },
     {
       "path": "safety-router-dataset/collect-data/system-adapter.mjs",
-      "sha256": "13cff8a91e8e448650b8119fca154779f5cac01ce2b1aa34ac4145410b25596a"
+      "sha256": "7249e1023b72748c5ead31778c31d6171e1c0e730de62d5f7c21e1fed92ce66f"
     },
     {
       "path": "safety-router-dataset/collect-data/task-catalog.mjs",
@@ -193,7 +193,7 @@
     },
     {
       "path": "setup/Install-Everything.ps1",
-      "sha256": "d42c4de83ab0626ff514c240a0b94c3745f8451e15447729b4b96d7d1bbb0276"
+      "sha256": "3369d14c7019d4502daddd77a1ef071e7d3a3ce8337143b5959761ca80d9e11b"
     },
     {
       "path": "setup/Verify-Checksums.ps1",
@@ -209,7 +209,7 @@
     },
     {
       "path": "setup/wsl-linux/install-stack.sh",
-      "sha256": "8d28928b88f35d69db56f18befe810b943a7afbeb00a351248a2af895b2a6509"
+      "sha256": "9a2c985e54b1ccc711d974539aa310b725853ea555e3659b764f368de00f3ca1"
     },
     {
       "path": "tests/run-tests.mjs",
@@ -217,11 +217,11 @@
     },
     {
       "path": "tools/events-panel/Enable-Panel.ps1",
-      "sha256": "6c9762e77070cc2bf10fc456c778b5ee2e20e5cdab0da0720ff86554bc205bcc"
+      "sha256": "ca0eb56dfe90c277144040f497f6c8cd820ca3da3c5c0859616a22687801d4f5"
     },
     {
       "path": "tools/events-panel/conversations.mjs",
-      "sha256": "60cfa1315e75ce2994f69323941d74bccb4ef5cbe41aeea637eaa0c50944e35e"
+      "sha256": "f52a219056424d9f9e8f021f71aed0e4187240bbdf0573ebdb62b98793041440"
     },
     {
       "path": "tools/events-panel/evidence.mjs",
@@ -237,11 +237,11 @@
     },
     {
       "path": "tools/events-panel/panel-service.mjs",
-      "sha256": "3d4f19abefa8b79907f3c6390c6e59eeea6ae2e97147b126c2e6f43b08579d5a"
+      "sha256": "a58e5434d397d69b233ebc1a5888e8bbbd9128f6497d7ff089155ee8b2dbf60a"
     },
     {
       "path": "tools/events-panel/panel-ui.js",
-      "sha256": "d682938a05263af8b339727a0c2a85bc7711bd6245fc65ac499810fc44f4f0de"
+      "sha256": "160f994f18384b2b90a8625b9ae6f2a5029c1def62c2cecc9f3280a69a98c411"
     },
     {
       "path": "tools/events-panel/patch-dashboard-ui.py",
@@ -252,12 +252,16 @@
       "sha256": "d41c3f73ff4431f712abbdaccb14ccc3c090eac0b9e82a47c90a2df4a27aec14"
     },
     {
+      "path": "tools/events-panel/policy-tier.mjs",
+      "sha256": "0ce85a9947ca96fbe048ae75a13cbf6737a51115e38e977c418dabbb7460136b"
+    },
+    {
       "path": "tools/events-panel/provenance.mjs",
-      "sha256": "a74ecfb3bcf776f899154ca82b6bfd18e8b0a17a8d3a5c79c7bd5e54346453a2"
+      "sha256": "8c2756546a9c4ca03d44ce85b7740e0983b28ad160bef0da013292e20a9c8432"
     },
     {
       "path": "tools/events-panel/service-files.txt",
-      "sha256": "4cfafc2aaede37d0e602a2864620a49fb649c39c86388525b6c77d41b401ed71"
+      "sha256": "d0a24e2f482ec5253ce95606d7e53dca2d4aeb6e7f9d89ef9d36b4b375981389"
     },
     {
       "path": "tools/events-panel/single-action-record.mjs",

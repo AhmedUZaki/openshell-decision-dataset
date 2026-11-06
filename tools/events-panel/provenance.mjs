@@ -112,7 +112,7 @@ export function projectSource(root = projectRoot) {
   } catch { /* fall back to the source hash */ }
   const files = [];
   for (const dir of ['setup', 'tools', 'safety-router-dataset', 'docs']) if (existsSync(resolve(root, dir))) walk(root, dir, files);
-  for (const f of ['README.md', 'Install Everything.cmd', 'Start OpenClaw.cmd', 'Verify Installation.cmd', 'Generate Dataset.cmd']) if (existsSync(resolve(root, f))) files.push(f);
+  for (const f of ['README.md', 'Install Everything.cmd', 'Start OpenClaw Workspace.cmd', 'Verify Installation.cmd', 'Generate Dataset.cmd']) if (existsSync(resolve(root, f))) files.push(f);
   return { kind: 'source_hash', value: sourceHash(root, files), files: files.length };
 }
 

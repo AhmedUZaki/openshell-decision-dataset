@@ -3,6 +3,7 @@ conversations.mjs
 openshell-events.mjs
 tool-calls.mjs
 policy-labels.mjs
+policy-tier.mjs
 provenance.mjs
 source-identity.mjs
 evidence.mjs

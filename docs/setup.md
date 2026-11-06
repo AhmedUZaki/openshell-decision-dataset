@@ -1,6 +1,6 @@
 # Setup, rebuild and launcher
 
-How the environment is installed and rebuilt, how `Start OpenClaw.cmd` starts it, and the compatibility backport.
+How the environment is installed and rebuilt, how `Start OpenClaw Workspace.cmd` starts it, and the compatibility backport.
 
 ## Installation
 
@@ -149,7 +149,7 @@ On a new x86-64 Windows 11 computer:
 7. Enter the Ubuntu sudo password if prompted.
 8. Wait while the installer downloads `qwen2.5:1.5b`, installs the pinned stack,
    creates `my-assistant`, applies the panel, and verifies isolation.
-9. Run `Verify Installation.cmd`, then `Start OpenClaw.cmd`.
+9. Run `Verify Installation.cmd`, then `Start OpenClaw Workspace.cmd`.
 
 The scripts are resumable. They preserve existing sandboxes and do not delete
 other Ollama models. Only `qwen2.5:1.5b` is requested by this setup.
@@ -174,7 +174,7 @@ missing prerequisite instead of silently substituting another component.
 
 ## Launcher
 
-Double-click "Start OpenClaw.cmd" in the project folder.
+Double-click "Start OpenClaw Workspace.cmd" in the project folder.
 
 The launcher starts Docker Desktop if needed, checks Ubuntu Docker integration,
 starts the existing Ollama and managed gateway services, runs NemoClaw recovery
@@ -191,7 +191,7 @@ The dashboard token is retrieved at runtime and is not saved in these files.
 No software is installed, no files are deleted, and no network policy is changed.
 Existing services are reused rather than starting duplicate Ollama servers.
 
-Keep the tools and setup folders next to "Start OpenClaw.cmd". The launcher is configured for
+Keep the tools and setup folders next to "Start OpenClaw Workspace.cmd". The launcher is configured for
 Ubuntu-24.04 and sandbox my-assistant. The default Linux username is detected.
 Docker startup can take up to five minutes. Additional recovery can take longer.
 If Windows requests an application permission or first-run action, handle it

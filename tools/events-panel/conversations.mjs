@@ -152,6 +152,8 @@ export class ConversationManager {
     item.closedAt=new Date().toISOString();this.persist();
     return {closed:id,...saved};
   }
+  // A person switched this conversation's policy tier from the panel. Kept with the conversation; saving evidence still compares the policy with its creation snapshot, so an edited chat never passes as unchanged.
+  noteTierChange(item,entry){item.policyEdits=[...(item.policyEdits||[]),entry];this.persist();}
   async open(id){const item=this.item(id);if(item.status!=='ready')throw Error('The conversation sandbox is not ready.');await this.verify(item);if(item.closedAt){await this.nemo([item.id,'start'],[],600000);delete item.closedAt;this.persist();}await this.nemo([item.id,'connect','--probe-only'],[],240000);await this.containerOf(item);const output=await this.nemo([item.id,'dashboard-url','--quiet']);const url=output.split(/\r?\n/).find(line=>line.startsWith(`http://127.0.0.1:${item.port}/`));if(!url)throw Error('Expected local dashboard URL was not returned.');return {url};}
   // Facts that let someone rebuild the environment, each read from the running system; one that cannot be read is null, never guessed.
   async reproducibility(item,{docker,container,folder}){

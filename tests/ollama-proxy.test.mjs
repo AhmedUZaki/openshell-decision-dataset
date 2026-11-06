@@ -1,5 +1,5 @@
 // Sandboxes reach Ollama only through NemoClaw's authentication proxy (port 11435), which stops when Windows or WSL restarts.
-// Start OpenClaw.cmd and Generate Dataset.cmd must both make sure it runs, with one shared script that never exposes its token.
+// Start OpenClaw Workspace.cmd and Generate Dataset.cmd must both make sure it runs, with one shared script that never exposes its token.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';

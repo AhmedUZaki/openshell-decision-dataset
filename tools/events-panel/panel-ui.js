@@ -1,6 +1,6 @@
 // The OpenShell panel inside the my-assistant OpenClaw dashboard. Chat with the Agent as usual; this panel shows what it did:
 // your messages, its replies, every tool call with its arguments and result, the OpenShell decision logged for it, the
-// sandbox's live OpenShell events and its policy. Everything here is read-only. Data is shown with textContent only.
+// sandbox's live OpenShell events and its policy. Everything here is read-only except the policy tier switcher in the Policy tab. Data is shown with textContent only.
 (() => {
   if (document.getElementById('openshell-panel-host')) return;
   const capability = '__OPENSHELL_PANEL_CAPABILITY__';
@@ -58,7 +58,7 @@
     <div class="error" hidden></div>
     <div class="summary" data-for="activity"></div>
     <div class="body"></div>
-    <footer>Read-only. Ask the Agent something in the chat; its tool calls appear here. A decision is shown only when OpenShell logged one for that call.</footer>
+    <footer>Ask the Agent something in the chat; its tool calls appear here. A decision is shown only when OpenShell logged one for that call. Only the Policy tab can change anything: it switches the policy tier.</footer>
   </section>`;
 
   const $ = s => root.querySelector(s);
@@ -174,10 +174,39 @@
   }
 
   // ---- Policy ----
-  function renderPolicy(p) {
+  // The tier switcher: NemoClaw's own tiers only (Restricted, Balanced, Open), never in a dataset collection sandbox.
+  let tierBusy = false;
+  function tierBox(t) {
+    const box = el('div', 'item');
+    const current = t.current ? t.labels[t.current] : 'Custom (changed by hand)';
+    box.append(el('div', 'tool', `Policy tier: ${current}`));
+    if (!t.editable) { box.append(el('div', 'note', t.reason)); return box; }
+    const row = el('div', 'row');
+    row.style.marginTop = '8px';
+    for (const name of ['restricted', 'balanced', 'open']) {
+      const b = el('button', null, t.labels[name]);
+      b.style.cssText = 'border:1px solid var(--line);background:var(--card);border-radius:7px;padding:5px 12px' + (name === t.current ? ';border-color:var(--accent);color:var(--accent);font-weight:650' : '');
+      b.disabled = name === t.current || tierBusy;
+      b.addEventListener('click', () => switchTier(name, t));
+      row.append(b);
+    }
+    box.append(row, el('div', 'note', 'Switching adds or removes NemoClaw\'s own presets for this chat sandbox and takes effect at once. A chat whose policy was changed can no longer be saved as unchanged dataset evidence.'));
+    return box;
+  }
+  async function switchTier(name, t) {
+    const adds = t.tiers[name].filter(p => !t.applied.includes(p));
+    const removes = t.applied.filter(p => ['restricted', 'balanced', 'open'].some(n => t.tiers[n].includes(p)) && !t.tiers[name].includes(p));
+    const lines = [`Switch this chat to the ${t.labels[name]} tier?`, adds.length ? `Add: ${adds.join(', ')}` : null, removes.length ? `Remove: ${removes.join(', ')}` : null].filter(Boolean).join('\n');
+    if (!window.confirm(lines)) return;
+    tierBusy = true; setStatus(true, 'Applying the policy tier…'); showError('');
+    try { await call('/policy/tier/set', { tier: name, confirm: true }); } catch (e) { showError(e.message); }
+    tierBusy = false; refresh();
+  }
+  function renderPolicy(p, t) {
     const policy = p.policy || p;
     $('.policy-meta').textContent = [p.version !== undefined ? `revision ${p.version}` : null, p.hash ? `hash ${String(p.hash).slice(0, 12)}` : null].filter(Boolean).join(' · ');
     body.replaceChildren();
+    if (t) body.append(tierBox(t));
     const net = policy.network_policies || {};
     const names = Object.keys(net);
     body.append(el('div', 'note', `${names.length} network policies. Hosts not listed are denied.`));
@@ -203,12 +232,12 @@
     try {
       if (wanted === 'activity') { setStatus(true, 'Reading the chat…'); const d = await call('/agent/activity', { sessionKey: session || null }); if (tab === wanted) renderActivity(d); setStatus(true, `Updated ${new Date().toLocaleTimeString()}`); }
       else if (wanted === 'events') { const d = await call('/events'); if (tab === wanted) renderEvents(d); setStatus(true, `Updated ${new Date().toLocaleTimeString()}`); }
-      else { const d = await call('/policy'); if (tab === wanted) renderPolicy(d); setStatus(true, 'Policy loaded'); }
+      else { const d = await call('/policy'); const t = await call('/policy/tier'); if (tab === wanted) renderPolicy(d, t); setStatus(true, 'Policy loaded'); }
       showError('');
     } catch (e) {
       const offline = e instanceof TypeError;
-      setStatus(false, offline ? 'Offline — run Start OpenClaw.cmd' : 'Error');
-      showError(offline ? 'The OpenShell panel service on 127.0.0.1:18891 is not answering. Run Start OpenClaw.cmd.' : e.message);
+      setStatus(false, offline ? 'Offline — run Start OpenClaw Workspace.cmd' : 'Error');
+      showError(offline ? 'The OpenShell panel service on 127.0.0.1:18891 is not answering. Run Start OpenClaw Workspace.cmd.' : e.message);
       if (wanted === 'activity' && /no longer exists/.test(e.message)) { session = ''; store.set('openshell-panel-session', ''); }
     } finally { busy = false; }
   }

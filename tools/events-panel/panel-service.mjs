@@ -11,6 +11,8 @@ import { ConversationManager, conversationAllowed } from './conversations.mjs';
 import { loadCatalog, byCategory } from '../../safety-router-dataset/collect-data/task-catalog.mjs';
 import { buildRecord } from './single-action-record.mjs';
 import { liveExportCommands, buildActivity, parseSessions, pickSession } from './live-session.mjs';
+import { TIER_NAMES, TIER_LABELS, parseTiers, parsePresetList, currentTier, planSwitch, editBlock } from './policy-tier.mjs';
+import { appendFileSync } from 'node:fs';
 
 const runFile = promisify(execFile);
 const run = (...args) => {
@@ -42,6 +44,40 @@ async function cli(args) {
 async function policy() {
   return JSON.parse(await cli(['policy','get','my-assistant','--full','--output','json']));
 }
+// ---- Policy tier of this chat's sandbox: read, and switch between NemoClaw's own tiers (never in a dataset collection sandbox) ----
+let tierBusy = false;
+async function tierState(conversation) {
+  const sandbox = sandboxName();
+  const tiersText = (await run('wsl.exe', ['-d','Ubuntu-24.04','--','cat',`/home/${state.linuxUser}/.nemoclaw/source/nemoclaw-blueprint/policies/tiers.yaml`], {timeout:30000,maxBuffer:1024*1024,windowsHide:true})).stdout;
+  const tiers = parseTiers(tiersText);
+  const list = parsePresetList(await conversations.nemo([sandbox,'policy','list'],[],120000));
+  const blocked = editBlock(conversation);
+  return { sandbox, tiers, labels: TIER_LABELS, current: currentTier(tiers, list.applied), list, editable: !blocked, reason: blocked };
+}
+async function setTier(conversation, request) {
+  if (request.confirm !== true) throw Error('Switching the policy tier needs confirmation.');
+  if (!TIER_NAMES.includes(request.tier)) throw Error('The tier must be restricted, balanced or open.');
+  if (tierBusy) throw Error('A policy change is already running.');
+  tierBusy = true;
+  try {
+    const s = await tierState(conversation);
+    if (!s.editable) throw Error(s.reason);
+    const plan = planSwitch(s.tiers, s.list, request.tier);
+    const done = [];
+    try {
+      for (const preset of plan.add) { await conversations.nemo([s.sandbox,'policy','add',preset,'--yes'],[],300000); done.push(`add ${preset}`); }
+      for (const preset of plan.remove) { await conversations.nemo([s.sandbox,'policy','remove',preset,'--yes'],[],300000); done.push(`remove ${preset}`); }
+    } finally {
+      // Whatever happened, the change is recorded, so a half-applied switch is never invisible.
+      const entry = { at: new Date().toISOString(), sandbox: s.sandbox, from_tier: plan.from, to_tier: plan.to, added: plan.add, removed: plan.remove, completed: done };
+      try { appendFileSync(resolve(root, '.local/policy-edits.jsonl'), JSON.stringify(entry) + '\n'); } catch {}
+      if (conversation && done.length) conversations.noteTierChange(conversation, entry);
+    }
+    const after = await tierState(conversation);
+    return { changed: plan.add.length + plan.remove.length > 0, from: plan.from, to: plan.to, added: plan.add, removed: plan.remove, current: after.current };
+  } finally { tierBusy = false; }
+}
+const publicTierState = s => ({ sandbox: s.sandbox, labels: s.labels, tiers: s.tiers, current: s.current, applied: [...s.list.applied], editable: s.editable, reason: s.reason });
 async function body(req) {
   if (!String(req.headers['content-type'] || '').startsWith('application/json')) throw Error('JSON content type is required.');
   const chunks = []; let size = 0;
@@ -95,8 +131,8 @@ async function agentActivity(requestedKey) {
   return { sessions: list, session, ...buildActivity({ trajectoryText: activityCache.trajectoryText, events }), readAt: new Date().toISOString() };
 }
 
-const readRoutes = ['/events', '/health', '/policy', '/conversations/list', '/conversations/captures', '/catalog'];
-const writeRoutes = ['/conversations/create', '/conversations/open', '/conversations/save', '/conversations/close', '/conversations/delete', '/conversations/timeline', '/agent/activity'];
+const readRoutes = ['/events', '/health', '/policy', '/policy/tier', '/conversations/list', '/conversations/captures', '/catalog'];
+const writeRoutes = ['/policy/tier/set', '/conversations/create', '/conversations/open', '/conversations/save', '/conversations/close', '/conversations/delete', '/conversations/timeline', '/agent/activity'];
 // The task catalog and the live my-assistant chat are read-only and for the main panel only, never for a conversation's own page.
 const mainOnlyRoutes = ['/catalog', '/agent/activity'];
 const handleRequest = async (req, res) => {
@@ -182,6 +218,8 @@ const handleRequest = async (req, res) => {
       res.end(JSON.stringify(await conversations.events(currentConversation)));return;
     }
     if (req.url === '/policy') { res.end(JSON.stringify(await policy())); return; }
+    if (req.url === '/policy/tier') { res.end(JSON.stringify(publicTierState(await tierState(currentConversation)))); return; }
+    if (req.url === '/policy/tier/set') { res.end(JSON.stringify(await setTier(currentConversation, await body(req)))); return; }
   } catch(error) { res.writeHead(400); res.end(JSON.stringify({error:safeError(error)})); return; }
   await collect();
   res.end(JSON.stringify(snapshot));
