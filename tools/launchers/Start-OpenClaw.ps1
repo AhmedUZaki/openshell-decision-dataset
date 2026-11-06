@@ -29,7 +29,7 @@ try {
     $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
     $panelDir = Join-Path $projectRoot 'tools\events-panel'
     $serviceFiles = @(Get-Content -LiteralPath (Join-Path $panelDir 'service-files.txt') | Where-Object { $_.Trim() })
-    foreach ($requiredFile in ($serviceFiles + 'service-files.txt', 'Enable-Panel.ps1')) {
+    foreach ($requiredFile in ($serviceFiles + 'service-files.txt', 'Enable-Panel.ps1', 'panel-ui.js', 'patch-dashboard-ui.py')) {
         if (-not (Test-Path -LiteralPath (Join-Path $panelDir $requiredFile))) { throw "A required update file is missing: tools\events-panel\$requiredFile" }
     }
     if (-not (Test-Path -LiteralPath $dockerDesktopExe)) {
@@ -103,11 +103,14 @@ try {
     $conversationState = Invoke-RestMethod -Uri 'http://127.0.0.1:18891/conversations/list' -Headers $panelHeaders -TimeoutSec 10
     $readyCount = @($conversationState.items | Where-Object status -eq 'ready').Count
     Write-Host "Panel service ready. Saved conversations: $readyCount"
+    $panelAsset = Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:18789/assets/openshell-events-panel.js' -TimeoutSec 10
+    if (-not $panelAsset.Content.Contains('Agent activity')) { throw 'The dashboard is not serving the current OpenShell panel.' }
 
     if (-not $CheckOnly) {
         Start-Process -FilePath $dashboardUrl[0]
         Write-Host 'OpenClaw is ready. The dashboard has opened in your browser.' -ForegroundColor Green
-        Write-Host 'Collect data with Generate Dataset.cmd. You can close this window.'
+        Write-Host 'Chat with the Agent there; the OpenShell panel on the right shows its tool calls and OpenShell decisions.'
+        Write-Host 'Collect data with Generate Dataset.cmd.'
     } else {
         Write-Host 'Startup checks passed. Browser opening was skipped.' -ForegroundColor Green
     }

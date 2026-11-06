@@ -1,10 +1,31 @@
-# OpenShell panel service
+# OpenShell panel
 
-The local service that creates the isolated conversations (one Sandbox per execution), saves their evidence as Bundles and builds the Safety Router records. `Generate Dataset.cmd` drives it; there is no graphical interface.
+Two parts:
+
+- **The OpenShell panel in the dashboard**: a read-only side panel in the `my-assistant` OpenClaw dashboard for trying the Agent by hand. You chat as usual; the panel shows what the Agent did.
+- **The panel service**: the local service behind it. It also creates the isolated conversations (one Sandbox per execution), saves their evidence as Bundles and builds the Safety Router records for `Generate Dataset.cmd`.
+
+## OpenShell panel in the dashboard
+
+`Start OpenClaw.cmd` adds the panel to the `my-assistant` dashboard at `http://127.0.0.1:18789/` (by hand: `Enable-Panel.ps1`; `-Remove` takes it out again). It opens on the right of the chat; **×** hides it and the **OpenShell** button brings it back. It has three tabs:
+
+| Tab | Shows |
+|---|---|
+| **Agent activity** | The chat in order: your messages, the Agent's replies (and model errors), and every tool call with its arguments, its result, the OpenShell decision logged for it and the OpenShell events during the call. **Latest chat** follows the most recently updated session; the list picks another. **Live** refreshes it every 5 s. |
+| **OpenShell events** | The sandbox's recent OpenShell events (network, HTTP, process, filesystem) with ALLOWED/DENIED/OBSERVED. Sandbox-wide: not tied to one call. |
+| **Policy** | The policy the sandbox runs: the network policies with their hosts and programs, the filesystem policy, process and Landlock. |
+
+How the activity is read (`POST /agent/activity`, main dashboard origin only): the service lists the sandbox's sessions with `openclaw sessions --json`, exports the chosen one with OpenClaw's own `openclaw sessions export-trajectory` into a fixed temporary folder inside the sandbox (`trajectory-exports/openshell-panel-live`), reads its `events.jsonl` and removes the folder. A session that has not changed is not exported again. Tool calls are matched to OpenShell events with the same rules as saved Bundles ([tool-call records](#tool-call-records)), from the last 3000 sandbox log lines.
+
+What it is not:
+
+- **Read-only.** It changes no policy and saves nothing on Windows. It never touches the isolated `conv-…` sandboxes.
+- **Not evidence.** `my-assistant` is shared by every chat, so background traffic can appear. A decision is shown only when OpenShell logged one for that call's host in the call's time window; "No OpenShell decision" means none was logged, not that the call was allowed. Tools without a `url` argument (for example `browser` with `targetUrl`) get no decision. For evidence, use `Generate Dataset.cmd`.
+- **Private.** The chat text appears in the browser only; the panel script carries the local capability token, like the service's other clients.
 
 ## Panel service
 
-`tools/events-panel/panel-service.mjs` runs on Windows Node.js and binds only to `127.0.0.1:18891`. The collector calls it over HTTP to create a conversation, save its Bundle, close and delete it. Bulk collection is done with `Generate Dataset.cmd` ([collecting data](dataset/collecting-data.md)).
+`tools/events-panel/panel-service.mjs` runs on Windows Node.js and binds only to `127.0.0.1:18891`. The dashboard panel reads the live chat from it; the collector calls it over HTTP to create a conversation, save its Bundle, close and delete it. Bulk collection is done with `Generate Dataset.cmd` ([collecting data](dataset/collecting-data.md)).
 
 ### Start and stop
 

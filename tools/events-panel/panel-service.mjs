@@ -10,6 +10,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { ConversationManager, conversationAllowed } from './conversations.mjs';
 import { loadCatalog, byCategory } from '../../safety-router-dataset/collect-data/task-catalog.mjs';
 import { buildRecord } from './single-action-record.mjs';
+import { liveExportCommands, buildActivity, parseSessions, pickSession } from './live-session.mjs';
 
 const runFile = promisify(execFile);
 const run = (...args) => {
@@ -68,10 +69,36 @@ async function collect() {
   return pending;
 }
 
+// The live chat of the shared my-assistant sandbox, for the dashboard's OpenShell panel. Read-only: OpenClaw's own exporter writes a temporary
+// folder inside the sandbox, which is removed again; nothing is saved on Windows. A session that has not changed is not exported again.
+let activityCache = { key: null, updatedAt: null, trajectoryText: null };
+let activityPending = null;
+async function inSandbox(args, maxBuffer = 32 * 1024 * 1024) {
+  const result = await run('wsl.exe', ['-d','Ubuntu-24.04','--',`/home/${state.linuxUser}/.local/bin/openshell`,'sandbox','exec','-n','my-assistant','--',...args], {timeout:90000,maxBuffer,windowsHide:true});
+  return result.stdout;
+}
+async function agentActivity(requestedKey) {
+  const sessions = parseSessions(await inSandbox(['openclaw','sessions','--json'], 8 * 1024 * 1024));
+  const session = pickSession(sessions, requestedKey);
+  const list = sessions.map(s => ({ key: s.key, status: s.status, updatedAt: s.updatedAt }));
+  if (!session) return { sessions: list, session: null, items: [], counts: null, unreadable_lines: [] };
+  if (activityCache.key !== session.key || activityCache.updatedAt !== session.updatedAt) {
+    const commands = liveExportCommands(session.key);
+    await inSandbox(commands.clear);
+    let trajectoryText;
+    try { await inSandbox(commands.export, 4 * 1024 * 1024); trajectoryText = await inSandbox(commands.read); }
+    finally { await inSandbox(commands.clear).catch(() => {}); }
+    activityCache = { key: session.key, updatedAt: session.updatedAt, trajectoryText };
+  }
+  const { stdout } = await run('wsl.exe', ['-d','Ubuntu-24.04','--',`/home/${state.linuxUser}/.local/bin/openshell`,'logs','my-assistant','--source','sandbox','-n','3000'], {timeout:30000,maxBuffer:16*1024*1024,windowsHide:true});
+  const events = [...new Map(stdout.split(/\r?\n/).map(parseEvent).filter(Boolean).map(e => [e.id, e])).values()];
+  return { sessions: list, session, ...buildActivity({ trajectoryText: activityCache.trajectoryText, events }), readAt: new Date().toISOString() };
+}
+
 const readRoutes = ['/events', '/health', '/policy', '/conversations/list', '/conversations/captures', '/catalog'];
-const writeRoutes = ['/conversations/create', '/conversations/open', '/conversations/save', '/conversations/close', '/conversations/delete', '/conversations/timeline'];
-// The task catalog is read-only and for the main panel only, never for a conversation's own page.
-const mainOnlyRoutes = ['/catalog'];
+const writeRoutes = ['/conversations/create', '/conversations/open', '/conversations/save', '/conversations/close', '/conversations/delete', '/conversations/timeline', '/agent/activity'];
+// The task catalog and the live my-assistant chat are read-only and for the main panel only, never for a conversation's own page.
+const mainOnlyRoutes = ['/catalog', '/agent/activity'];
 const handleRequest = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -103,6 +130,20 @@ const handleRequest = async (req, res) => {
       // The selectable tasks of safety-router-dataset/task-catalog/, as files define them: nothing here is executed, and nothing outside that folder is read.
       const catalog=loadCatalog(root);
       res.end(JSON.stringify({ok:catalog.ok,errors:catalog.errors.slice(0,20),warnings:catalog.warnings.slice(0,20),categories:byCategory(catalog).map(c=>({id:c.id,title:c.title,description:c.description,tasks:c.tasks.map(x=>({task_id:x.task_id,title:x.title,description:x.description,task_text:x.task_text,version:x.version,hash:x.hash,tags:x.tags,expected_capabilities:x.expected_capabilities,task_type:x.task_type,single_action:x.single_action,external_dependency:x.external_dependency,estimated_minutes:x.estimated_minutes,safety_notes:x.safety_notes}))}))}));return;
+    }
+    if(req.url==='/agent/activity'){
+      const request=await body(req);
+      const key=request.sessionKey??null;
+      if(key!==null&&typeof key!=='string')throw Error('sessionKey must be a string.');
+      // One read at a time: a request for the same session shares the read in progress; one for another session waits for it, then reads its own.
+      const wanted=key??'';
+      if(!activityPending||activityPending.key!==wanted){
+        const previous=activityPending?.promise.catch(()=>{});
+        const promise=(async()=>{await previous;return agentActivity(key);})();
+        activityPending={key:wanted,promise};
+        promise.catch(()=>{}).finally(()=>{if(activityPending?.promise===promise)activityPending=null;});
+      }
+      res.end(JSON.stringify(await activityPending.promise));return;
     }
     const currentConversation = conversations.context(requestOrigin);
     if(currentConversation) await conversations.verify(currentConversation);

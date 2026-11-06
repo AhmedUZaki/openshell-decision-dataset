@@ -8,4 +8,5 @@ source-identity.mjs
 evidence.mjs
 ../../safety-router-dataset/collect-data/task-catalog.mjs
 single-action-record.mjs
+live-session.mjs
 ../../safety-router-dataset/release-checks/scan.mjs

@@ -9,6 +9,12 @@ function Assert-NativeSuccess {
 }
 
 if ($Remove) {
+    $docker = 'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
+    $containers = @(& $docker ps --format '{{.Names}}' | Where-Object { $_ -match '^openshell-default--my-assistant-[0-9a-f-]{36}$' })
+    if ($LASTEXITCODE -eq 0 -and $containers.Count -eq 1) {
+        & $docker cp (Join-Path $PSScriptRoot 'patch-dashboard-ui.py') "$($containers[0]):/tmp/openshell-panel-patch.py" | Out-Null
+        if ($LASTEXITCODE -eq 0) { & $docker exec -u 0 $containers[0] python3 /tmp/openshell-panel-patch.py --remove }
+    }
     if (Test-Path -LiteralPath (Join-Path $localDir 'openshell-panel.pid')) {
         $bridgePid = [int](Get-Content -LiteralPath (Join-Path $localDir 'openshell-panel.pid'))
         $bridgeProcess = Get-CimInstance Win32_Process -Filter "ProcessId=$bridgePid" -ErrorAction SilentlyContinue
@@ -85,5 +91,23 @@ if (-not $bridgeReady) {
     }
 }
 if (-not $bridgeReady) { throw 'The local events bridge could not start. Port 18891 may be in use.' }
-
 Write-Host 'OpenShell panel service ready (port 18891).' -ForegroundColor Green
+
+# The OpenShell panel in the shared my-assistant dashboard only: chat there, and the panel shows the Agent's tool calls and OpenShell's decisions.
+# The dashboard files live in the sandbox container, so this runs again on every start (a recreated sandbox comes back without it).
+$docker = 'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
+$uiRoot = '/usr/local/lib/nemoclaw/openclaw-runtime/node_modules/openclaw/dist/control-ui'
+$containers = @(& $docker ps --format '{{.Names}}' | Where-Object { $_ -match '^openshell-default--my-assistant-[0-9a-f-]{36}$' })
+Assert-NativeSuccess
+if ($containers.Count -ne 1) { throw 'Expected one running my-assistant sandbox. Start OpenClaw first.' }
+$containerName = $containers[0]
+$template = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'panel-ui.js'))
+$clientPath = Join-Path $localDir 'openshell-events-panel.js'
+[IO.File]::WriteAllText($clientPath, $template.Replace('__OPENSHELL_PANEL_CAPABILITY__', $state.capability), [Text.UTF8Encoding]::new($false))
+& $docker cp $clientPath "${containerName}:${uiRoot}/assets/openshell-events-panel.js" | Out-Null
+Assert-NativeSuccess
+& $docker cp (Join-Path $PSScriptRoot 'patch-dashboard-ui.py') "${containerName}:/tmp/openshell-panel-patch.py" | Out-Null
+Assert-NativeSuccess
+& $docker exec -u 0 $containerName python3 /tmp/openshell-panel-patch.py
+Assert-NativeSuccess
+Write-Host 'OpenShell panel added to the dashboard. Refresh an open chat page to see it.' -ForegroundColor Green

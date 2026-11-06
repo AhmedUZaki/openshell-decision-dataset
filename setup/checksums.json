@@ -45,7 +45,7 @@
     },
     {
       "path": "Start OpenClaw.cmd",
-      "sha256": "b5ac1c8d63e181e1e59eb8a8c6747124f0ea59f38eef333b9cc647908d53a04a"
+      "sha256": "8fcf936ef26ba41865e5e54fc260884d80b74b080f995f5e904bc804608c5887"
     },
     {
       "path": "Verify Installation.cmd",
@@ -217,7 +217,7 @@
     },
     {
       "path": "tools/events-panel/Enable-Panel.ps1",
-      "sha256": "85f1791570dfb1729a6b7dee260639844b203613b94866f218b16ea091313d5a"
+      "sha256": "6c9762e77070cc2bf10fc456c778b5ee2e20e5cdab0da0720ff86554bc205bcc"
     },
     {
       "path": "tools/events-panel/conversations.mjs",
@@ -228,12 +228,24 @@
       "sha256": "2483e80c49c2fceb5a2bd04b692520af350a259b381494a6d2ccb2b24c5dd5ff"
     },
     {
+      "path": "tools/events-panel/live-session.mjs",
+      "sha256": "dc351c4f10f8e3e43a33db4b0af98f9bd638021011a081270f0ef79eebdeb508"
+    },
+    {
       "path": "tools/events-panel/openshell-events.mjs",
       "sha256": "d485f2bfa12bdd1d32d6df4879b0929e2b3a3bd1f3b02d875b294284bc1280bc"
     },
     {
       "path": "tools/events-panel/panel-service.mjs",
-      "sha256": "1c403e5581177badc944a401c966225a69a735635590eefc1c73d3286e127da7"
+      "sha256": "3d4f19abefa8b79907f3c6390c6e59eeea6ae2e97147b126c2e6f43b08579d5a"
+    },
+    {
+      "path": "tools/events-panel/panel-ui.js",
+      "sha256": "d682938a05263af8b339727a0c2a85bc7711bd6245fc65ac499810fc44f4f0de"
+    },
+    {
+      "path": "tools/events-panel/patch-dashboard-ui.py",
+      "sha256": "d33fc2e6fc9e14b03b5b9866b978dbfc287b8e80343d7b0ef72040308e00891a"
     },
     {
       "path": "tools/events-panel/policy-labels.mjs",
@@ -245,7 +257,7 @@
     },
     {
       "path": "tools/events-panel/service-files.txt",
-      "sha256": "a386d6ae298eb8de12d6d9228e29d2ef50233605ded76d68ac9e3848c6f3570c"
+      "sha256": "4cfafc2aaede37d0e602a2864620a49fb649c39c86388525b6c77d41b401ed71"
     },
     {
       "path": "tools/events-panel/single-action-record.mjs",
@@ -265,7 +277,7 @@
     },
     {
       "path": "tools/launchers/Start-OpenClaw.ps1",
-      "sha256": "6f0e71fefbfd3d578e57a3aec20bf19e5c0ec9ba62483d12ec34192dc810e457"
+      "sha256": "4cc634aa37de9c1ecf047582d351a47032cab3d3a59f35123f90ab88b3e2c30f"
     },
     {
       "path": "tools/launchers/ensure-ollama-proxy.sh",

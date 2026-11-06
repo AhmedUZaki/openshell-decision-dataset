@@ -8,6 +8,7 @@ Daily use, where the files live and how to back them up, and what to do when som
 | --- | --- |
 | Start everything (Docker Desktop, Ollama and its authentication proxy, the managed gateway, the OpenClaw sandbox, the OpenShell panel) and open the dashboard at `http://127.0.0.1:18789/` | `Start OpenClaw.cmd` |
 | Check the installation (versions against `setup/pins.env`, file checksums, Ollama, the model, the sandbox) | `Verify Installation.cmd` |
+| See what the Agent did in your chat (messages, tool calls, results, OpenShell decisions) | the **OpenShell** panel on the right of the dashboard ([panel](panel.md#openshell-panel-in-the-dashboard)) |
 | Check the launcher without opening a browser | `powershell -File tools\launchers\Start-OpenClaw.ps1 -CheckOnly` |
 | Collect data in bulk | `Generate Dataset.cmd` ([collecting the dataset](dataset/collecting-data.md)) |
 
@@ -88,6 +89,7 @@ The launcher prints the failing step and keeps the window open. It deletes nothi
 | `Ollama did not become ready.` | In Ubuntu run `curl http://127.0.0.1:11434/api/version`. If it fails, check `systemctl status ollama` and `journalctl -u ollama`. |
 | `The OpenClaw sandbox did not become ready.` | The launcher already retried for several minutes. Run it once more; if it still fails, check Docker Desktop for the `openshell-default--my-assistant-…` container and its logs. |
 | `Could not obtain the dashboard URL.` / `The local dashboard is not responding.` | The sandbox is up but the dashboard on port 18789 is not. Run the launcher again; if it persists, restart Docker Desktop. |
+| `The dashboard is not serving the current OpenShell panel.` | The panel was not added to the dashboard (a recreated sandbox container comes back without it). Run the launcher again and refresh the browser tab, or add it by hand: `powershell -File toolsevents-panelEnable-Panel.ps1`. |
 | `The local events bridge could not start. Port 18891 may be in use.` | Another process holds port 18891 or the panel service failed to start. Close it, then run the launcher again, or start it by hand: `powershell -File tools\events-panel\Enable-Panel.ps1`. |
 | `A required update file is missing: tools\events-panel\…` | A file listed in `tools/events-panel/service-files.txt` is missing. Restore it; the list is the only place that names the panel's required files. |
 

@@ -17,6 +17,9 @@ if "%launchResult%"=="0" (
   echo ============================================================
   echo  OpenClaw has started. The dashboard is open in your browser:
   echo  http://127.0.0.1:18789/
+  echo.
+  echo  Chat with the Agent there. The OpenShell panel on the right
+  echo  shows its tool calls, their results and OpenShell decisions.
   echo ============================================================
   echo.
   echo Press any key to close this window. OpenClaw keeps running.

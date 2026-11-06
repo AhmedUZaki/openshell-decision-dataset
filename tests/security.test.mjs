@@ -16,16 +16,33 @@ const mjs = dir => readdirSync(resolve(root, dir)).filter(f => f.endsWith('.mjs'
 const sources = () => [...mjs('safety-router-dataset/collect-data'), ...mjs('safety-router-dataset/create-dataset'), ...mjs('tools/events-panel')];
 const tests = () => mjs('tests');
 
-test('there is no GUI: the panel is a local service only, and nothing injects a script into a sandbox dashboard', () => {
-  for (const gone of ['tools/events-panel/panel-ui.js', 'tools/events-panel/patch-dashboard-ui.py']) assert.equal(existsSync(resolve(root, gone)), false, `${gone} was removed`);
-  const conv = text('tools/events-panel/conversations.mjs'), enable = text('tools/events-panel/Enable-Panel.ps1'), launcher = text('tools/launchers/Start-OpenClaw.ps1');
-  for (const [name, src] of [['conversations.mjs', conv], ['Enable-Panel.ps1', enable], ['Start-OpenClaw.ps1', launcher]]) assert.doesNotMatch(src, /panel-ui|patch-dashboard-ui|openshell-events-panel|control-ui\/assets/, name);
+test('the OpenShell panel is read-only and goes into the shared my-assistant dashboard only, never into a conversation sandbox', () => {
+  const ui = text('tools/events-panel/panel-ui.js'), conv = text('tools/events-panel/conversations.mjs'), enable = text('tools/events-panel/Enable-Panel.ps1');
+  // Tabs: Agent activity, OpenShell events, Policy. No collection, Dataset, save or delete controls.
+  assert.deepEqual([...ui.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]), ['activity', 'events', 'policy']);
+  const routes = [...ui.matchAll(/call\('(\/[a-z/]+)'/g)].map(m => m[1]).sort();
+  assert.deepEqual(routes, ['/agent/activity', '/events', '/policy'], 'only the read-only routes');
+  assert.doesNotMatch(ui, /conversations\/|\/catalog|\/dataset|Generate Dataset|deleteBundles/);
+  // Chat data is drawn with textContent only: the one innerHTML is the fixed template, before any data arrives.
+  assert.equal((ui.match(/innerHTML|insertAdjacentHTML|outerHTML|eval\(|new Function/g) || []).length, 1);
+  assert.match(ui, /root\.innerHTML = `<style>/);
+  // Installed into the my-assistant container only; the conversation sandboxes stay untouched.
+  assert.match(enable, /\^openshell-default--my-assistant-\[0-9a-f-\]\{36\}\$/);
+  assert.doesNotMatch(conv, /panel-ui|patch-dashboard-ui|openshell-events-panel|control-ui\/assets/, 'conversations.mjs injects nothing');
   assert.match(conv, /async containerOf\(item\)/, 'the conversation container identity is still verified');
+});
+test('the live activity route is read-only, main-panel only, and passes no free text to a shell', () => {
+  const server = text('tools/events-panel/panel-service.mjs');
+  assert.match(server, /mainOnlyRoutes = \['\/catalog', '\/agent\/activity'\]/);
+  assert.ok(server.indexOf('timingSafeEqual') < server.indexOf("req.url==='/agent/activity'"), 'the capability is checked first');
+  assert.ok(server.indexOf('mainOnlyRoutes.includes(req.url)') < server.indexOf("req.url==='/agent/activity'"), 'the main-origin check runs first');
+  assert.match(server, /liveExportCommands\(session\.key\)/);
+  assert.doesNotMatch(server, /'sh','-c'|"sh","-c"|bash','-c/, 'no shell script built from request data');
 });
 test('the catalog route lists only selectable tasks from safety-router-dataset/task-catalog, read-only, for the main panel, behind the capability and origin checks', () => {
   const server = text('tools/events-panel/panel-service.mjs');
   assert.match(server, /readRoutes = \[[^\]]*'\/catalog'/);
-  assert.match(server, /mainOnlyRoutes = \['\/catalog'\]/);
+  assert.match(server, /mainOnlyRoutes = \['\/catalog'/);
   assert.match(server, /byCategory\(catalog\)/, 'only the selectable tasks, grouped by category');
   assert.ok(server.indexOf('timingSafeEqual') < server.indexOf("req.url==='/catalog'"), 'the capability is checked first');
   assert.ok(server.indexOf('validOrigin') < server.indexOf("req.url==='/catalog'"));
