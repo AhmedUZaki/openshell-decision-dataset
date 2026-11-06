@@ -119,7 +119,17 @@ export function makeContext({ root, print = null }) {
     return createHash('sha256').update(Buffer.concat(files.map(f => readFileSync(resolve(base, f))))).digest('hex');
   };
 
-  // The system checks of the preview. They only read: nothing is created or run.
+  // Runs tools/launchers/ensure-ollama-proxy.sh in Ubuntu through stdin (so its line endings never matter). Resolves with its one-line result; rejects with its message.
+  const ensureOllamaProxy = () => new Promise((res, rej) => {
+    const script = readFileSync(resolve(root, 'tools/launchers/ensure-ollama-proxy.sh'), 'utf8').replace(/\r/g, '');
+    const child = execFile('wsl.exe', ['-d', 'Ubuntu-24.04', '--', 'bash', '-s'], { timeout: 90000, windowsHide: true }, (error, stdout) => {
+      const line = String(stdout || '').trim().split(/\r?\n/).pop() || '';
+      if (error) rej(Error(line || error.message)); else res(line);
+    });
+    child.stdin.on('error', () => {}); child.stdin.end(script);
+  });
+
+  // The system checks of the preview. They only read, except the proxy check below: nothing is created or run.
   const systemChecks = async (selection, remaining) => {
     const results = [];
     const check = async (name, fn) => { try { const r = await fn(); results.push({ name, status: r.status || 'PASS', detail: r.detail }); } catch (e) { results.push({ name, status: 'FAIL', detail: String(e.message).slice(0, 220) }); } };
@@ -138,6 +148,9 @@ export function makeContext({ root, print = null }) {
       return { detail: `build ${expected.slice(0, 12)}; ${items.length} conversation(s) exist` };
     });
     await check('Ollama answers', async () => ({ detail: (await wsl('curl', '-fsS', '--max-time', '5', 'http://127.0.0.1:11434/api/version')).stdout.trim() }));
+    // Sandboxes reach Ollama only through NemoClaw's authentication proxy. It stops when Windows or WSL restarts, and every inference request then
+    // fails with 502. This is the one check that may start something: it starts NemoClaw's own proxy (see tools/launchers/ensure-ollama-proxy.sh).
+    await check('Ollama authentication proxy answers (started when it was down)', async () => ({ detail: await ensureOllamaProxy() }));
     await check('the configured model is installed', async () => {
       const pins = Object.fromEntries(readFileSync(resolve(root, 'setup/pins.env'), 'utf8').split(/\r?\n/).map(l => /^([A-Z_]+)=(.*)$/.exec(l)).filter(Boolean).map(m => [m[1], m[2].trim()]));
       if (!(await wsl('ollama', 'list')).stdout.includes(pins.MODEL)) throw Error(`model ${pins.MODEL} is not installed`);

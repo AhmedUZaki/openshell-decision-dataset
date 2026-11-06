@@ -77,7 +77,7 @@
     },
     {
       "path": "safety-router-dataset/collect-data/system-adapter.mjs",
-      "sha256": "f2d8cb03db47cc25338f3d5bdb30f179fd55938e0e0a1070a5404b89364b2fe3"
+      "sha256": "13cff8a91e8e448650b8119fca154779f5cac01ce2b1aa34ac4145410b25596a"
     },
     {
       "path": "safety-router-dataset/collect-data/task-catalog.mjs",
@@ -265,7 +265,11 @@
     },
     {
       "path": "tools/launchers/Start-OpenClaw.ps1",
-      "sha256": "b3d86ba0537143f30b7595fb976fd6c8b6e913cd15c41d112362a2ccb464a74b"
+      "sha256": "6f0e71fefbfd3d578e57a3aec20bf19e5c0ec9ba62483d12ec34192dc810e457"
+    },
+    {
+      "path": "tools/launchers/ensure-ollama-proxy.sh",
+      "sha256": "26e37a6ac7ce8dd9c0d106ab25149ffcc39535c61806f3f13fe5915d209342aa"
     }
   ]
 }

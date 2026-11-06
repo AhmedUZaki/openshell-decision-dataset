@@ -6,7 +6,7 @@ Daily use, where the files live and how to back them up, and what to do when som
 
 | Do this | With |
 | --- | --- |
-| Start everything (Docker Desktop, Ollama, the managed gateway, the OpenClaw sandbox, the OpenShell panel) and open the dashboard at `http://127.0.0.1:18789/` | `Start OpenClaw.cmd` |
+| Start everything (Docker Desktop, Ollama and its authentication proxy, the managed gateway, the OpenClaw sandbox, the OpenShell panel) and open the dashboard at `http://127.0.0.1:18789/` | `Start OpenClaw.cmd` |
 | Check the installation (versions against `setup/pins.env`, file checksums, Ollama, the model, the sandbox) | `Verify Installation.cmd` |
 | Check the launcher without opening a browser | `powershell -File tools\launchers\Start-OpenClaw.ps1 -CheckOnly` |
 | Collect data in bulk | `Generate Dataset.cmd` ([collecting the dataset](dataset/collecting-data.md)) |
@@ -101,6 +101,12 @@ Each check is independent; the message after `[FAIL]` names the cause.
 - **`Configured model is missing.`** The model named in `setup/pins.env` is not in `ollama list`. Install it again with the installer or `ollama pull <model>` inside Ubuntu.
 - **`Expected <version>, got: …`.** An installed component differs from the version pinned in `setup/pins.env`. Reinstall it, or change the pin deliberately and record why.
 - **`Preset <name> is not applied.`** Apply it with NemoClaw's own command, for example `nemoclaw my-assistant policy add brave --yes`.
+
+### `Chat/readiness failed`: HTTP 502, "inference route ... not known healthy"
+
+Sandboxes reach Ollama only through NemoClaw's authentication proxy on `127.0.0.1:11435`. It is a plain process in Ubuntu and stops when Windows or WSL restarts; every sandbox inference request then fails with HTTP 502 and `connect` stops with `failed to verify or repair inference route: health`. `nemoclaw my-assistant doctor` shows `Ollama auth proxy is unreachable`.
+
+`Start OpenClaw.cmd` and the preflight of `Generate Dataset.cmd` now check it and start it when it is down (`tools/launchers/ensure-ollama-proxy.sh`: it starts NemoClaw's own proxy script with the token NemoClaw stored, never prints the token, and changes nothing when the proxy answers). You see `Ollama authentication proxy: running` or `started`. If it reports `could not be started`, the message names the cause (for example another process holds port 11435); run `nemoclaw my-assistant doctor` for details.
 
 ### The panel says "Offline" or answers 401
 

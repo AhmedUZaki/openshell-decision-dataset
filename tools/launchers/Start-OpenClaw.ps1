@@ -13,6 +13,17 @@ function Invoke-LinuxStep {
     }
 }
 
+# Sandboxes reach Ollama only through NemoClaw's authentication proxy, which stops when Windows or WSL restarts.
+# ensure-ollama-proxy.sh starts it when it is down (and changes nothing when it already answers).
+function Invoke-OllamaProxyCheck {
+    $script = (Get-Content -LiteralPath (Join-Path $PSScriptRoot 'ensure-ollama-proxy.sh') -Raw) -replace "`r", ''
+    # Passed as base64: piping text to a native program in Windows PowerShell 5.1 adds a byte-order mark that bash cannot run.
+    $encoded = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($script))
+    $result = @(& wsl.exe -d $distroName -- bash -c "echo $encoded | base64 -d | bash")
+    if ($LASTEXITCODE -ne 0) { throw "The Ollama authentication proxy is not running and could not be started: $($result -join ' ')" }
+    Write-Host "  Ollama authentication proxy: $($result -join ' ')"
+}
+
 try {
     Write-Host 'Starting OpenClaw + OpenShell Conversation Workspace...' -ForegroundColor Cyan
     $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -60,6 +71,9 @@ try {
 
     Write-Host 'Starting the managed gateway...'
     Invoke-LinuxStep -LinuxArguments @('--', 'systemctl', '--user', 'start', 'nemoclaw-openshell-gateway.service')
+
+    Write-Host 'Checking the Ollama authentication proxy...'
+    Invoke-OllamaProxyCheck
 
     Write-Host 'Checking and recovering the OpenClaw sandbox. This may take a few minutes...'
     # A sandbox started by the probe needs time for its gateway process to come up.
