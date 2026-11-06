@@ -12,8 +12,17 @@ echo Starting OpenClaw with OpenShell Events, Policies, and Conversations...
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\launchers\Start-OpenClaw.ps1" %*
 set "launchResult=%errorlevel%"
 popd
-if not "%launchResult%"=="0" (
+echo.
+if "%launchResult%"=="0" (
+  echo ============================================================
+  echo  OpenClaw has started. The dashboard is open in your browser:
+  echo  http://127.0.0.1:18789/
+  echo ============================================================
   echo.
-  pause
+  echo Press any key to close this window. OpenClaw keeps running.
+) else (
+  echo OpenClaw did not start. Review the error above.
+  echo Press any key to close this window.
 )
+pause >nul
 exit /b %launchResult%
