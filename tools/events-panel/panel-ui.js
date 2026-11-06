@@ -61,12 +61,14 @@
     <footer>Ask the Agent something in the chat; its tool calls appear here. A decision is shown only when OpenShell logged one for that call. Only the Policy tab can change anything: it switches the policy tier.</footer>
   </section>`;
 
+  // The chat open in the dashboard: its address is /chat/main/<id>, and <id> starts that chat's session key. null on /chat/main itself.
+  const openChatId = () => { const m = /^\/chat\/main\/([0-9a-f]{8}(?:-[0-9a-f-]{1,32})?)\/?$/.exec(location.pathname); return m ? m[1] : null; };
   const $ = s => root.querySelector(s);
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined && text !== null) n.textContent = String(text); return n; };
   const time = iso => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString(); };
   const json = v => { try { return JSON.stringify(v, null, 2); } catch { return String(v); } };
   const panel = $('.panel'), toggle = $('.toggle'), body = $('.body'), errorBox = $('.error');
-  let tab = 'activity', session = store.get('openshell-panel-session') || '', busy = false, shown = '';
+  let tab = 'activity', session = store.get('openshell-panel-session') || '', busy = false, again = false, shown = '';
   // Sections a person opened stay open across the 5-second refresh.
   const opened = new Set();
   const fold = (key, label, text) => { const d = el('details'); d.open = opened.has(key); d.addEventListener('toggle', () => { if (d.open) opened.add(key); else opened.delete(key); }); d.append(el('summary', null, label), el('pre', null, text)); return d; };
@@ -123,7 +125,7 @@
     const keys = data.sessions.map(s => s.key).join('|');
     if (select.dataset.keys !== keys) {
       select.dataset.keys = keys;
-      select.replaceChildren(el('option', null, 'Latest chat'), ...data.sessions.map(s => { const o = el('option', null, `${s.key.replace(/^agent:main:/, '')} · ${s.status ?? '?'} · ${s.updatedAt ? new Date(s.updatedAt).toLocaleString() : ''}`); o.value = s.key; return o; }));
+      select.replaceChildren(el('option', null, openChatId() ? 'Open chat (follows the dashboard)' : 'Latest chat'), ...data.sessions.map(s => { const o = el('option', null, `${s.key.replace(/^agent:main:/, '')} · ${s.status ?? '?'} · ${s.updatedAt ? new Date(s.updatedAt).toLocaleString() : ''}`); o.value = s.key; return o; }));
       select.firstChild.value = '';
     }
     select.value = session;
@@ -176,6 +178,7 @@
   // ---- Policy ----
   // The tier switcher: NemoClaw's own tiers only (Restricted, Balanced, Open), never in a dataset collection sandbox.
   let tierBusy = false;
+  const DEFAULT_TIER = 'open';
   function tierBox(t) {
     const box = el('div', 'item');
     const current = t.current ? t.labels[t.current] : 'Custom (changed by hand)';
@@ -184,8 +187,11 @@
     const row = el('div', 'row');
     row.style.marginTop = '8px';
     for (const name of ['restricted', 'balanced', 'open']) {
-      const b = el('button', null, t.labels[name]);
-      b.style.cssText = 'border:1px solid var(--line);background:var(--card);border-radius:7px;padding:5px 12px' + (name === t.current ? ';border-color:var(--accent);color:var(--accent);font-weight:650' : '');
+      // Open is this panel's default tier: it is marked, and offered as the filled button whenever another tier is active. (Only the panel's default; NemoClaw's own default for new sandboxes stays as pinned.)
+      const isDefault = name === DEFAULT_TIER;
+      const b = el('button', null, isDefault ? `${t.labels[name]} (default)` : t.labels[name]);
+      b.style.cssText = 'border:1px solid var(--line);background:var(--card);border-radius:7px;padding:5px 12px'
+        + (name === t.current ? ';border-color:var(--accent);color:var(--accent);font-weight:650' : isDefault ? ';background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:650' : '');
       b.disabled = name === t.current || tierBusy;
       b.addEventListener('click', () => switchTier(name, t));
       row.append(b);
@@ -193,19 +199,53 @@
     box.append(row, el('div', 'note', 'Switching adds or removes NemoClaw\'s own presets for this chat sandbox and takes effect at once. A chat whose policy was changed can no longer be saved as unchanged dataset evidence.'));
     return box;
   }
+  // The progress bar of a running switch: steps done of steps total, and the time left estimated by the service.
+  const TIER_LABELS = { restricted: 'Restricted', balanced: 'Balanced', open: 'Open' };
+  let progressTimer = null, progressBox = null;
+  const duration = ms => { const s = Math.ceil(ms / 1000); return s >= 60 ? `${Math.floor(s / 60)} min ${s % 60} s` : `${s} s`; };
+  function drawProgress(p) {
+    if (!progressBox) progressBox = el('div', 'item');
+    progressBox.replaceChildren();
+    const name = TIER_LABELS[p.to] || p.to;
+    const title = p.status === 'running' ? `Applying the ${name} tier: step ${Math.min(p.done + 1, p.total)} of ${p.total}${p.current ? ` (${p.current})` : ''}`
+      : p.status === 'done' ? `The ${name} tier is applied (${p.total} steps, ${duration(p.elapsed_ms)}).`
+      : `The policy change stopped after ${p.done} of ${p.total} steps.`;
+    progressBox.append(el('div', 'tool', title));
+    const track = el('div'); track.style.cssText = 'height:10px;margin-top:8px;border-radius:5px;background:var(--line);overflow:hidden';
+    const fill = el('div'); fill.style.cssText = `height:100%;width:${p.total ? Math.round(100 * p.done / p.total) : 100}%;background:${p.status === 'failed' ? 'var(--deny)' : 'var(--accent)'};transition:width .4s`;
+    track.append(fill);
+    progressBox.append(track, el('div', 'note', p.status === 'running' ? `About ${duration(p.remaining_ms)} left. Elapsed ${duration(p.elapsed_ms)}.` : p.error || ''));
+    return progressBox;
+  }
+  function watchProgress() {
+    if (progressTimer) return;
+    progressTimer = setInterval(async () => {
+      try {
+        const { progress: p } = await call('/policy/tier/progress');
+        if (!p) return;
+        if (progressBox && progressBox.isConnected) drawProgress(p);
+        if (p.status !== 'running') { clearInterval(progressTimer); progressTimer = null; tierBusy = false; setTimeout(refresh, 1500); }
+      } catch { /* the next tick tries again */ }
+    }, 2000);
+  }
   async function switchTier(name, t) {
     const adds = t.tiers[name].filter(p => !t.applied.includes(p));
     const removes = t.applied.filter(p => ['restricted', 'balanced', 'open'].some(n => t.tiers[n].includes(p)) && !t.tiers[name].includes(p));
     const lines = [`Switch this chat to the ${t.labels[name]} tier?`, adds.length ? `Add: ${adds.join(', ')}` : null, removes.length ? `Remove: ${removes.join(', ')}` : null].filter(Boolean).join('\n');
     if (!window.confirm(lines)) return;
-    tierBusy = true; setStatus(true, 'Applying the policy tier…'); showError('');
-    try { await call('/policy/tier/set', { tier: name, confirm: true }); } catch (e) { showError(e.message); }
+    tierBusy = true; showError('');
+    try {
+      const r = await call('/policy/tier/set', { tier: name, confirm: true });
+      progressBox = null;
+      if (r.status === 'running') { body.prepend(drawProgress(r)); setStatus(true, 'Applying the policy tier…'); watchProgress(); return; }
+    } catch (e) { showError(e.message); }
     tierBusy = false; refresh();
   }
-  function renderPolicy(p, t) {
+  function renderPolicy(p, t, pr) {
     const policy = p.policy || p;
     $('.policy-meta').textContent = [p.version !== undefined ? `revision ${p.version}` : null, p.hash ? `hash ${String(p.hash).slice(0, 12)}` : null].filter(Boolean).join(' · ');
     body.replaceChildren();
+    if (pr && pr.status === 'running') { tierBusy = true; progressBox = null; body.append(drawProgress(pr)); watchProgress(); }
     if (t) body.append(tierBox(t));
     const net = policy.network_policies || {};
     const names = Object.keys(net);
@@ -226,20 +266,22 @@
   }
 
   async function refresh() {
-    if (busy || panel.hidden) return;
+    if (panel.hidden) return;
+    // A request for another tab while one read is running is repeated when that read ends, so switching tabs never leaves a blank page.
+    if (busy) { again = true; return; }
     busy = true;
     const wanted = tab;
     try {
-      if (wanted === 'activity') { setStatus(true, 'Reading the chat…'); const d = await call('/agent/activity', { sessionKey: session || null }); if (tab === wanted) renderActivity(d); setStatus(true, `Updated ${new Date().toLocaleTimeString()}`); }
+      if (wanted === 'activity') { setStatus(true, 'Reading the chat…'); const d = await call('/agent/activity', { sessionKey: session || null, chatId: openChatId() }); if (tab === wanted) renderActivity(d); setStatus(true, `Updated ${new Date().toLocaleTimeString()}`); }
       else if (wanted === 'events') { const d = await call('/events'); if (tab === wanted) renderEvents(d); setStatus(true, `Updated ${new Date().toLocaleTimeString()}`); }
-      else { const d = await call('/policy'); const t = await call('/policy/tier'); if (tab === wanted) renderPolicy(d, t); setStatus(true, 'Policy loaded'); }
+      else { const d = await call('/policy'); const t = await call('/policy/tier'); const { progress: pr } = await call('/policy/tier/progress'); if (tab === wanted) renderPolicy(d, t, pr); setStatus(true, 'Policy loaded'); }
       showError('');
     } catch (e) {
       const offline = e instanceof TypeError;
       setStatus(false, offline ? 'Offline — run Start OpenClaw Workspace.cmd' : 'Error');
       showError(offline ? 'The OpenShell panel service on 127.0.0.1:18891 is not answering. Run Start OpenClaw Workspace.cmd.' : e.message);
       if (wanted === 'activity' && /no longer exists/.test(e.message)) { session = ''; store.set('openshell-panel-session', ''); }
-    } finally { busy = false; }
+    } finally { busy = false; if (again) { again = false; refresh(); } }
   }
 
   toggle.addEventListener('click', () => setOpen(true));
@@ -248,6 +290,12 @@
   root.querySelectorAll('.refresh').forEach(b => b.addEventListener('click', refresh));
   $('.session').addEventListener('change', e => { session = e.target.value; store.set('openshell-panel-session', session); body.replaceChildren(el('div', 'empty', 'Loading…')); refresh(); });
   $('.filter').addEventListener('change', refresh);
-  setInterval(() => { if (document.visibilityState === 'visible' && (tab !== 'activity' || $('.live').checked) && tab !== 'policy') refresh(); }, 5000);
+  // Every 2 s; a read still running is never doubled, so a slow read simply sets the pace. Switching chats in the dashboard is noticed at the next tick.
+  let lastPath = location.pathname;
+  setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    if (location.pathname !== lastPath) { lastPath = location.pathname; if (tab === 'activity' && !session) { shown = ''; refresh(); return; } }
+    if ((tab !== 'activity' || $('.live').checked) && tab !== 'policy') refresh();
+  }, 2000);
   setOpen(store.get('openshell-panel-open') !== '0');
 })();

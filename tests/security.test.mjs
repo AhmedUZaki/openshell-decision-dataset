@@ -20,8 +20,8 @@ test('the OpenShell panel is read-only except the policy tier switch, and goes i
   const ui = text('tools/events-panel/panel-ui.js'), conv = text('tools/events-panel/conversations.mjs'), enable = text('tools/events-panel/Enable-Panel.ps1');
   // Tabs: Agent activity, OpenShell events, Policy. No collection, Dataset, save or delete controls.
   assert.deepEqual([...ui.matchAll(/data-tab="([a-z]+)"/g)].map(m => m[1]), ['activity', 'events', 'policy']);
-  const routes = [...ui.matchAll(/call\('(\/[a-z/]+)'/g)].map(m => m[1]).sort();
-  assert.deepEqual(routes, ['/agent/activity', '/events', '/policy', '/policy/tier', '/policy/tier/set'], 'the read-only routes and the confirmed tier switch');
+  const routes = [...new Set([...ui.matchAll(/call\('(\/[a-z/]+)'/g)].map(m => m[1]))].sort();
+  assert.deepEqual(routes, ['/agent/activity', '/events', '/policy', '/policy/tier', '/policy/tier/progress', '/policy/tier/set'], 'the read-only routes and the confirmed tier switch');
   assert.doesNotMatch(ui, /conversations\/|\/catalog|\/dataset|Generate Dataset|deleteBundles/);
   // Chat data is drawn with textContent only: the one innerHTML is the fixed template, before any data arrives.
   assert.equal((ui.match(/innerHTML|insertAdjacentHTML|outerHTML|eval\(|new Function/g) || []).length, 1);
@@ -36,7 +36,8 @@ test('the live activity route is read-only, main-panel only, and passes no free 
   assert.match(server, /mainOnlyRoutes = \['\/catalog', '\/agent\/activity'\]/);
   assert.ok(server.indexOf('timingSafeEqual') < server.indexOf("req.url==='/agent/activity'"), 'the capability is checked first');
   assert.ok(server.indexOf('mainOnlyRoutes.includes(req.url)') < server.indexOf("req.url==='/agent/activity'"), 'the main-origin check runs first');
-  assert.match(server, /liveExportCommands\(session\.key\)/);
+  assert.match(server, /exportTrajectory\(session\.key\)/);
+  assert.match(server, /liveExportCommands\(key\)/, 'the export commands come from the validated session key only');
   assert.doesNotMatch(server, /'sh','-c'|"sh","-c"|bash','-c/, 'no shell script built from request data');
 });
 test('the catalog route lists only selectable tasks from safety-router-dataset/task-catalog, read-only, for the main panel, behind the capability and origin checks', () => {

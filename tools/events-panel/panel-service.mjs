@@ -10,7 +10,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { ConversationManager, conversationAllowed } from './conversations.mjs';
 import { loadCatalog, byCategory } from '../../safety-router-dataset/collect-data/task-catalog.mjs';
 import { buildRecord } from './single-action-record.mjs';
-import { liveExportCommands, buildActivity, parseSessions, pickSession } from './live-session.mjs';
+import { liveExportCommands, buildActivity, parseSessions, pickSession, chatSessionPrefix, CHAT_ID } from './live-session.mjs';
 import { TIER_NAMES, TIER_LABELS, parseTiers, parsePresetList, currentTier, planSwitch, editBlock } from './policy-tier.mjs';
 import { appendFileSync } from 'node:fs';
 
@@ -54,28 +54,63 @@ async function tierState(conversation) {
   const blocked = editBlock(conversation);
   return { sandbox, tiers, labels: TIER_LABELS, current: currentTier(tiers, list.applied), list, editable: !blocked, reason: blocked };
 }
+// A switch applies one preset at a time and can take minutes, so it runs as a background job: the POST returns at once and the panel
+// polls /policy/tier/progress for a progress bar. The estimate of the time left is the average of the steps finished so far
+// (a first guess of 25 s per step until one has finished).
+let tierJob = null;
+const FIRST_STEP_GUESS_MS = 25000;
+function tierProgress() {
+  const j = tierJob;
+  if (!j) return null;
+  const average = j.stepMs.length ? j.stepMs.reduce((a, b) => a + b, 0) / j.stepMs.length : FIRST_STEP_GUESS_MS;
+  const left = Math.max(0, j.steps.length - j.stepMs.length);
+  const intoStep = j.status === 'running' ? Date.now() - j.stepStartedAt : 0;
+  return {
+    sandbox: j.sandbox, status: j.status, from: j.from, to: j.to, total: j.steps.length, done: j.stepMs.length,
+    current: j.status === 'running' ? j.steps[j.stepMs.length] ?? null : null,
+    elapsed_ms: (j.finishedAt ?? Date.now()) - j.startedAt,
+    remaining_ms: j.status === 'running' ? Math.max(0, Math.round(average * left - intoStep)) : 0,
+    error: j.error ?? null,
+  };
+}
 async function setTier(conversation, request) {
   if (request.confirm !== true) throw Error('Switching the policy tier needs confirmation.');
   if (!TIER_NAMES.includes(request.tier)) throw Error('The tier must be restricted, balanced or open.');
   if (tierBusy) throw Error('A policy change is already running.');
   tierBusy = true;
+  let started = false;
   try {
     const s = await tierState(conversation);
     if (!s.editable) throw Error(s.reason);
     const plan = planSwitch(s.tiers, s.list, request.tier);
-    const done = [];
-    try {
-      for (const preset of plan.add) { await conversations.nemo([s.sandbox,'policy','add',preset,'--yes'],[],300000); done.push(`add ${preset}`); }
-      for (const preset of plan.remove) { await conversations.nemo([s.sandbox,'policy','remove',preset,'--yes'],[],300000); done.push(`remove ${preset}`); }
-    } finally {
-      // Whatever happened, the change is recorded, so a half-applied switch is never invisible.
-      const entry = { at: new Date().toISOString(), sandbox: s.sandbox, from_tier: plan.from, to_tier: plan.to, added: plan.add, removed: plan.remove, completed: done };
-      try { appendFileSync(resolve(root, '.local/policy-edits.jsonl'), JSON.stringify(entry) + '\n'); } catch {}
-      if (conversation && done.length) conversations.noteTierChange(conversation, entry);
-    }
-    const after = await tierState(conversation);
-    return { changed: plan.add.length + plan.remove.length > 0, from: plan.from, to: plan.to, added: plan.add, removed: plan.remove, current: after.current };
-  } finally { tierBusy = false; }
+    const steps = [...plan.add.map(p => ({ verb: 'add', preset: p })), ...plan.remove.map(p => ({ verb: 'remove', preset: p }))];
+    tierJob = { sandbox: s.sandbox, from: plan.from, to: plan.to, steps: steps.map(x => `${x.verb} ${x.preset}`), stepMs: [], startedAt: Date.now(), stepStartedAt: Date.now(), status: steps.length ? 'running' : 'done', finishedAt: steps.length ? null : Date.now(), error: null };
+    if (!steps.length) return tierProgress();
+    started = true;
+    const job = tierJob;
+    void (async () => {
+      const completed = [];
+      try {
+        for (const step of steps) {
+          job.stepStartedAt = Date.now();
+          await conversations.nemo([s.sandbox, 'policy', step.verb, step.preset, '--yes'], [], 300000);
+          job.stepMs.push(Date.now() - job.stepStartedAt);
+          completed.push(`${step.verb} ${step.preset}`);
+        }
+        job.status = 'done';
+      } catch (error) {
+        job.status = 'failed'; job.error = safeError(error);
+      } finally {
+        job.finishedAt = Date.now();
+        // Whatever happened, the change is recorded, so a half-applied switch is never invisible.
+        const entry = { at: new Date().toISOString(), sandbox: s.sandbox, from_tier: plan.from, to_tier: plan.to, added: plan.add, removed: plan.remove, completed, status: job.status };
+        try { appendFileSync(resolve(root, '.local/policy-edits.jsonl'), JSON.stringify(entry) + '\n'); } catch {}
+        if (conversation && completed.length) conversations.noteTierChange(conversation, entry);
+        tierBusy = false;
+      }
+    })();
+    return tierProgress();
+  } finally { if (!started) tierBusy = false; }
 }
 const publicTierState = s => ({ sandbox: s.sandbox, labels: s.labels, tiers: s.tiers, current: s.current, applied: [...s.list.applied], editable: s.editable, reason: s.reason });
 async function body(req) {
@@ -113,25 +148,45 @@ async function inSandbox(args, maxBuffer = 32 * 1024 * 1024) {
   const result = await run('wsl.exe', ['-d','Ubuntu-24.04','--',`/home/${state.linuxUser}/.local/bin/openshell`,'sandbox','exec','-n','my-assistant','--',...args], {timeout:90000,maxBuffer,windowsHide:true});
   return result.stdout;
 }
-async function agentActivity(requestedKey) {
-  const sessions = parseSessions(await inSandbox(['openclaw','sessions','--json'], 8 * 1024 * 1024));
-  const session = pickSession(sessions, requestedKey);
+// OpenClaw's CLI needs about 2 s per call, so the reads are overlapped: the OpenShell log is read while the session is exported, and while
+// the chat is running the export starts together with the session list instead of after it.
+async function exportTrajectory(key) {
+  const commands = liveExportCommands(key);
+  await inSandbox(commands.clear);
+  try { await inSandbox(commands.export, 4 * 1024 * 1024); return await inSandbox(commands.read); }
+  finally { await inSandbox(commands.clear).catch(() => {}); }
+}
+async function agentActivity(requestedKey, chatId) {
+  const logsRead = run('wsl.exe', ['-d','Ubuntu-24.04','--',`/home/${state.linuxUser}/.local/bin/openshell`,'logs','my-assistant','--source','sandbox','-n','3000'], {timeout:30000,maxBuffer:16*1024*1024,windowsHide:true});
+  logsRead.catch(() => {});
+  // The session the panel will show, when it is already known and running: its export starts at once, beside the list.
+  const guess = requestedKey || (chatId && activityCache.chatKeys?.[chatId]) || null;
+  const hot = guess && activityCache.key === guess && activityCache.status === 'running' ? exportTrajectory(guess) : null;
+  hot?.catch(() => {});
+  let sessions, session;
+  try {
+    sessions = parseSessions(await inSandbox(['openclaw','sessions','--json'], 8 * 1024 * 1024));
+    session = pickSession(sessions, requestedKey, chatId);
+  } catch (error) { await hot?.catch(() => {}); throw error; }
   const list = sessions.map(s => ({ key: s.key, status: s.status, updatedAt: s.updatedAt }));
-  if (!session) return { sessions: list, session: null, items: [], counts: null, unreadable_lines: [] };
-  if (activityCache.key !== session.key || activityCache.updatedAt !== session.updatedAt) {
-    const commands = liveExportCommands(session.key);
-    await inSandbox(commands.clear);
-    let trajectoryText;
-    try { await inSandbox(commands.export, 4 * 1024 * 1024); trajectoryText = await inSandbox(commands.read); }
-    finally { await inSandbox(commands.clear).catch(() => {}); }
-    activityCache = { key: session.key, updatedAt: session.updatedAt, trajectoryText };
+  if (!session) { await hot?.catch(() => {}); return { sessions: list, session: null, items: [], counts: null, unreadable_lines: [] }; }
+  const chatKeys = { ...(activityCache.chatKeys || {}) };
+  if (chatId && session.key.startsWith(chatSessionPrefix(chatId))) chatKeys[chatId] = session.key;
+  if (hot && session.key === guess) {
+    activityCache = { ...activityCache, key: session.key, updatedAt: session.updatedAt, trajectoryText: await hot };
+  } else {
+    await hot?.catch(() => {});   // never two exports at once: they share one folder
+    if (activityCache.key !== session.key || activityCache.updatedAt !== session.updatedAt) {
+      activityCache = { ...activityCache, key: session.key, updatedAt: session.updatedAt, trajectoryText: await exportTrajectory(session.key) };
+    }
   }
-  const { stdout } = await run('wsl.exe', ['-d','Ubuntu-24.04','--',`/home/${state.linuxUser}/.local/bin/openshell`,'logs','my-assistant','--source','sandbox','-n','3000'], {timeout:30000,maxBuffer:16*1024*1024,windowsHide:true});
+  activityCache = { ...activityCache, status: session.status, chatKeys };
+  const { stdout } = await logsRead;
   const events = [...new Map(stdout.split(/\r?\n/).map(parseEvent).filter(Boolean).map(e => [e.id, e])).values()];
-  return { sessions: list, session, ...buildActivity({ trajectoryText: activityCache.trajectoryText, events }), readAt: new Date().toISOString() };
+  return { sessions: list, session, following: chatId && session.key.startsWith(chatSessionPrefix(chatId)) ? 'open_chat' : null, ...buildActivity({ trajectoryText: activityCache.trajectoryText, events }), readAt: new Date().toISOString() };
 }
 
-const readRoutes = ['/events', '/health', '/policy', '/policy/tier', '/conversations/list', '/conversations/captures', '/catalog'];
+const readRoutes = ['/events', '/health', '/policy', '/policy/tier', '/policy/tier/progress', '/conversations/list', '/conversations/captures', '/catalog'];
 const writeRoutes = ['/policy/tier/set', '/conversations/create', '/conversations/open', '/conversations/save', '/conversations/close', '/conversations/delete', '/conversations/timeline', '/agent/activity'];
 // The task catalog and the live my-assistant chat are read-only and for the main panel only, never for a conversation's own page.
 const mainOnlyRoutes = ['/catalog', '/agent/activity'];
@@ -171,11 +226,14 @@ const handleRequest = async (req, res) => {
       const request=await body(req);
       const key=request.sessionKey??null;
       if(key!==null&&typeof key!=='string')throw Error('sessionKey must be a string.');
+      // The chat open in the dashboard (the id in /chat/main/<id>), used when no session was picked by hand.
+      const chatId=request.chatId??null;
+      if(chatId!==null&&(typeof chatId!=='string'||!CHAT_ID.test(chatId)))throw Error('chatId is not valid.');
       // One read at a time: a request for the same session shares the read in progress; one for another session waits for it, then reads its own.
-      const wanted=key??'';
+      const wanted=`${key??''}|${chatId??''}`;
       if(!activityPending||activityPending.key!==wanted){
         const previous=activityPending?.promise.catch(()=>{});
-        const promise=(async()=>{await previous;return agentActivity(key);})();
+        const promise=(async()=>{await previous;return agentActivity(key,chatId);})();
         activityPending={key:wanted,promise};
         promise.catch(()=>{}).finally(()=>{if(activityPending?.promise===promise)activityPending=null;});
       }
@@ -219,6 +277,7 @@ const handleRequest = async (req, res) => {
     }
     if (req.url === '/policy') { res.end(JSON.stringify(await policy())); return; }
     if (req.url === '/policy/tier') { res.end(JSON.stringify(publicTierState(await tierState(currentConversation)))); return; }
+    if (req.url === '/policy/tier/progress') { res.end(JSON.stringify({ progress: tierProgress() })); return; }
     if (req.url === '/policy/tier/set') { res.end(JSON.stringify(await setTier(currentConversation, await body(req)))); return; }
   } catch(error) { res.writeHead(400); res.end(JSON.stringify({error:safeError(error)})); return; }
   await collect();

@@ -29,13 +29,23 @@ export function parseSessions(output) {
     .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
 }
 
-// The session the panel shows: the one asked for, else the most recently updated chat (scheduled cron runs are not chats).
-export function pickSession(sessions, requested = null) {
+// The id the dashboard shows in its address for a chat (/chat/main/<id>) is the start of that chat's session key: agent:main:dashboard:<id>-....
+export const CHAT_ID = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){0,4}(?:-[0-9a-f]{1,12})?$/;
+export const chatSessionPrefix = chatId => `agent:main:dashboard:${chatId}`;
+
+// The session the panel shows: the one asked for, else the chat that is open in the dashboard, else the most recently updated chat
+// (scheduled cron runs are not chats).
+export function pickSession(sessions, requested = null, chatId = null) {
   if (requested !== null && requested !== undefined && requested !== '') {
     if (!SESSION_KEY.test(String(requested))) throw Error('The session key is not valid.');
     const found = sessions.find(s => s.key === requested);
     if (!found) throw Error('That session no longer exists.');
     return found;
+  }
+  if (chatId !== null && chatId !== undefined && chatId !== '') {
+    if (!CHAT_ID.test(String(chatId))) throw Error('The chat id is not valid.');
+    const open = sessions.find(s => s.key.startsWith(chatSessionPrefix(chatId)));
+    if (open) return open;   // a chat that has no session yet (nothing sent) falls through to the latest one
   }
   return sessions.find(s => !s.key.includes(':cron:')) || sessions[0] || null;
 }

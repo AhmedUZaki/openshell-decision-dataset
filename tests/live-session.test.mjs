@@ -2,7 +2,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseEvent } from '../tools/events-panel/openshell-events.mjs';
-import { LIVE_EXPORT_DIR, SESSION_KEY, buildActivity, liveExportCommands, parseSessions, pickSession } from '../tools/events-panel/live-session.mjs';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { LIVE_EXPORT_DIR, SESSION_KEY, CHAT_ID, buildActivity, liveExportCommands, parseSessions, pickSession } from '../tools/events-panel/live-session.mjs';
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const line = (seq, type, ts, data) => JSON.stringify({ seq, type, ts, sessionId: 's1', entryId: `e${seq}`, data });
 const trajectory = [
@@ -79,4 +83,26 @@ test('long text is shortened for the panel and says how much was left out', () =
   const long = 'x'.repeat(5000);
   const a = buildActivity({ trajectoryText: line(1, 'user.message', '2026-11-06T19:00:00.000Z', { message: { role: 'user', content: long } }) });
   assert.match(a.items[0].text, /… \(1000 more characters\)$/);
+});
+
+test('the chat open in the dashboard (/chat/main/<id>) is followed; an unknown id, no session yet or a hand-picked session keep their own rules', () => {
+  const open = [
+    { key: 'agent:main:dashboard:b2c3d4e5-1111-2222-3333-444455556666', updatedAt: 3 },
+    { key: 'agent:main:dashboard:724d717a-473e-4aad-aeb3-24ef2081bf7e', updatedAt: 2 },
+    { key: 'agent:main:main', updatedAt: 1 },
+  ];
+  assert.equal(pickSession(open, null, '724d717a').key, 'agent:main:dashboard:724d717a-473e-4aad-aeb3-24ef2081bf7e', 'the id in the address picks that chat, not the latest one');
+  assert.equal(pickSession(open, null, 'ffffffff').key, 'agent:main:dashboard:b2c3d4e5-1111-2222-3333-444455556666', 'a chat with no session yet falls back to the latest');
+  assert.equal(pickSession(open, 'agent:main:main', '724d717a').key, 'agent:main:main', 'a session picked by hand wins');
+  assert.throws(() => pickSession(open, null, 'x; rm -rf /'), /chat id is not valid/);
+  assert.ok(CHAT_ID.test('724d717a') && !CHAT_ID.test('main') && !CHAT_ID.test('724d717a/../x'));
+});
+
+test('the panel reads the open chat, polls every 2 s and overlaps its slow reads', () => {
+  const ui = readFileSync(resolve(root, 'tools/events-panel/panel-ui.js'), 'utf8');
+  const svc = readFileSync(resolve(root, 'tools/events-panel/panel-service.mjs'), 'utf8');
+  assert.match(ui, /chatId: openChatId\(\)/);
+  assert.match(ui, /}, 2000\);/);
+  assert.match(svc, /const logsRead = run\(/, 'the OpenShell log is read while the session is exported');
+  assert.match(svc, /never two exports at once/, 'the exports still never overlap: they share one folder');
 });

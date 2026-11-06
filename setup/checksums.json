@@ -229,7 +229,7 @@
     },
     {
       "path": "tools/events-panel/live-session.mjs",
-      "sha256": "dc351c4f10f8e3e43a33db4b0af98f9bd638021011a081270f0ef79eebdeb508"
+      "sha256": "287e4d8f125a0ee8ba86512d8bf49155b9228a60c99850ee0853e8221d7cd9b4"
     },
     {
       "path": "tools/events-panel/openshell-events.mjs",
@@ -237,11 +237,11 @@
     },
     {
       "path": "tools/events-panel/panel-service.mjs",
-      "sha256": "a58e5434d397d69b233ebc1a5888e8bbbd9128f6497d7ff089155ee8b2dbf60a"
+      "sha256": "e2fe1dc95b276a34276777110c7dfecb3cd729151ec47752b59e61e0eaf96063"
     },
     {
       "path": "tools/events-panel/panel-ui.js",
-      "sha256": "160f994f18384b2b90a8625b9ae6f2a5029c1def62c2cecc9f3280a69a98c411"
+      "sha256": "20fd0e723c55d2bbdd1e27d21b5ac4b6501d7ecbb696670003968431afd37efd"
     },
     {
       "path": "tools/events-panel/patch-dashboard-ui.py",
