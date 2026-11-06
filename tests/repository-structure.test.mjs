@@ -180,7 +180,7 @@ test('the scan finds secrets and machine-specific paths without printing the val
 test('the .gitignore evaluator ignores runtime data and releases but keeps tooling, docs and reports tracked', () => {
   const rules = parseGitignore(read('.gitignore'));
   for (const f of ['.local/dataset/x.jsonl', '.local/evidence/raw/a/b.log', '.local/runs/x/state.json', '.local/task-captures/c/manifest.json', '.env', 'node_modules/x/index.js', 'secrets.json', 'a/credentials.txt', 'x.log', 'my-assistant-effective.json']) assert.equal(isIgnored(f, rules), true, `${f} is ignored`);
-  for (const f of ['README.md', 'package.json', 'Run Tests.cmd', 'safety-router-dataset/release-checks/scan.mjs', 'docs/development.md', 'docs/license-choice.md', 'setup/checksums.json', 'tests/run-tests.mjs', '.env.example']) assert.equal(isIgnored(f, rules), false, `${f} is tracked`);
+  for (const f of ['README.md', 'package.json', 'Run Tests.cmd', 'safety-router-dataset/release-checks/scan.mjs', 'docs/development.md', 'LICENSE', 'setup/checksums.json', 'tests/run-tests.mjs', '.env.example']) assert.equal(isIgnored(f, rules), false, `${f} is tracked`);
   });
 
 test('the files Git would stage contain no .local data, no secret and no user-specific path', () => {
@@ -193,14 +193,12 @@ test('the files Git would stage contain no .local data, no secret and no user-sp
 });
 
 // ---- Documentation and repository decisions ---------------------------------------------------------------------------------------------
-test('the owner chose MIT: the LICENSE file, the README note and the comparison are in place', () => {
+test('the owner chose MIT: the LICENSE file and the README note are in place', () => {
   const lic = read('LICENSE');
   assert.match(lic, /^MIT License\r?\n/);
   assert.match(lic, /Copyright \(c\) 2026 The openshell-decision-dataset contributors/);
   assert.match(lic, /Permission is hereby granted, free of charge/);
   assert.match(read('README.md'), /\*\*License: MIT\*\*/);
-  const d = read('docs/license-choice.md');
-  for (const needle of ['MIT', 'Apache-2.0', 'patent grant', 'does not grant']) assert.ok(d.includes(needle), needle);
 });
 
 test('no tracked documentation or README contains a path tied to the current user', () => {

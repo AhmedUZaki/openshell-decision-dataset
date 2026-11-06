@@ -17,7 +17,7 @@ A real dashboard URL containing `#token=` is a credential. Generate it locally w
 
 ## Publish later
 
-Before the first commit run `npm run scan:source`: it lists every file Git would include and scans them for secrets and user-specific paths. There is no release workflow: a dataset is published, if ever, only as a separate, deliberately reviewed export, never from `.local/`. The Safety Router records (`.local/safety-router/`) hold task text, Agent messages, tool results and raw-event references; they are redacted of credentials and personal machine paths and an unresolved finding excludes the execution, but they are private like everything under `.local/`. The code and documentation are MIT licensed ([LICENSE](../LICENSE), [license-choice.md](license-choice.md)); the records are not covered by that license.
+Before the first commit run `npm run scan:source`: it lists every file Git would include and scans them for secrets and user-specific paths. There is no release workflow: a dataset is published, if ever, only as a separate, deliberately reviewed export, never from `.local/`. The Safety Router records (`.local/safety-router/`) hold task text, Agent messages, tool results and raw-event references; they are redacted of credentials and personal machine paths and an unresolved finding excludes the execution, but they are private like everything under `.local/`. The code and documentation are MIT licensed ([LICENSE](../LICENSE)); the records are not covered by that license.
 
 Install Git for Windows (`winget install Git.Git`) and create an empty repository on GitHub. Open PowerShell in the project folder and run:
 

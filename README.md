@@ -17,7 +17,7 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 | 2. Collect data | Double-click `Generate Dataset.cmd`, press 1 (Collect new data), then 1 in the collector menu: choose policies, tests and the number of independent executions, review the calculation, type `RUN`. It ends with export, validation and verification of the Safety Router Dataset | [docs/dataset/collecting-data.md](docs/dataset/collecting-data.md), [tasks](safety-router-dataset/task-catalog/README.md) |
 | 3. Create the Dataset | `Generate Dataset.cmd` option 2, Create Dataset (or `npm run create:dataset`): builds, validates, verifies independently and saves a NEW folder named with its UTC creation time under `.local/safety-router/datasets/` | [docs/dataset/safety-router-dataset.md](docs/dataset/safety-router-dataset.md) |
 
-> **License: MIT** (code and documentation). See [LICENSE](LICENSE) and [docs/license-choice.md](docs/license-choice.md); a released dataset needs its own terms.
+> **License: MIT** (code and documentation). See [LICENSE](LICENSE). A released dataset needs its own terms.
 
 ## Layout
 
@@ -78,7 +78,7 @@ Sandboxes use NemoClaw's own default policy tiers with no hand-written rules: **
 2. [Daily operation](docs/operations.md#daily-operation)
 3. [Troubleshooting](docs/operations.md#troubleshooting)
 4. [Files and backups](docs/operations.md#files-and-backups)
-5. [Security and GitHub publishing](docs/security-and-publishing.md) · [Project structure, tests and portability](docs/development.md) · [License choice](docs/license-choice.md)
+5. [Security and GitHub publishing](docs/security-and-publishing.md) · [Project structure, tests and portability](docs/development.md) · [License](LICENSE)
 6. [OpenShell panel](docs/panel.md#openshell-events-side-panel) · [launcher](docs/setup.md#launcher) · [policies](docs/policies.md) · [compatibility backport](docs/setup.md#compatibility-backport)
 7. Dataset: [workflow](safety-router-dataset/README.md) · [collecting it (Generate Dataset.cmd)](docs/dataset/collecting-data.md) · [tasks](safety-router-dataset/task-catalog/README.md) · [evidence layers](docs/dataset/evidence-layers.md) · [the Safety Router dataset](docs/dataset/safety-router-dataset.md) · [record format](docs/dataset/safety-router-dataset.md#one-record)
 
