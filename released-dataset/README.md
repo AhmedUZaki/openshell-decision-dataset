@@ -15,14 +15,36 @@ The manifest also lists `needs-review-records.jsonl` (5) and `excluded-execution
 - Policy tiers: restricted 20, balanced 22, open 19.
 - Tasks: 18 `web_fetch` destinations, 1 to 6 records each.
 
-## Record fields
+## What is inside `accepted-execution-records.jsonl`
 
-- `task`: task id, text, hash and category.
-- `applied_policy`: tier name, the complete effective policy OpenShell reported, its hash, and whether it stayed unchanged.
-- `outcomes`: three independent results. The OpenShell policy decision (the label, with its evidence status, reason and event ids), the task result, and the action result after OpenShell.
-- `agent_timeline`, `openshell_timeline`, `action_and_policy_events`: the evidence for the single action.
-- `evaluation_metadata`, `execution_checks`, `routing`: evaluation-only metadata and acceptance checks. Never a model input or a label.
-- `timestamps`, `identifiers`, `integrity`: provenance and hashes.
+One line is one complete test: one Agent, one `web_fetch` call, one destination, one policy. The file is large (about 170 KB per record) because each record carries the full evidence, not only the label.
+
+Top-level keys of every record:
+
+- `record_type`: always `single_action_policy_test_record`.
+- `task`: `task_id` (for example `fetch-weather-api`), `task_text` (the exact prompt given to the Agent, including the URL), `task_hash`, `task_category`.
+- `applied_policy`: `policy_profile` (`restricted`, `balanced` or `open`), `policy_snapshot` (the complete effective OpenShell policy: filesystem, Landlock and every network policy with its binaries, endpoints and rules), `policy_hash`, `policy_remained_unchanged`. Most of the file size is this snapshot.
+- `action_and_policy_events`: `agent_action` (the one tool call: `tool_call_id`, `tool_name`, `arguments.url`, request, start, finish and result times), `events_observed_during_action` (the OpenShell events inside the action window, for example `NET:OPEN` with `ALLOW` or `DENY`), `events_outside_action` (every other OpenShell event of that sandbox, such as setup), and `association_method`.
+- `agent_timeline`: the ordered Agent events (task received, tool call, tool result, final answer), each with `sequence`, `timestamp_utc`, `event_type` and `content`.
+- `openshell_timeline`: all OpenShell events of the sandbox in order (about 230 per record). Each has `sequence`, `timestamp_utc`, `raw_event_reference`, `event_type`, `decision`, `reason`, `matched_rule`, `event_origin` (`sandbox_setup_activity` or `agent_task_activity`), `destination`, `http_method` and `http_path`.
+- `outcomes`: three independent results.
+  - `openshell_policy_decision`: `value` (`OPENSHELL_ALLOWED` or `OPENSHELL_DENIED`) is the label. It also has `evidence_status`, `reason` (for a denial, for example that the endpoint is not allowed by any policy), `matched_rule` (the policy that allowed it) and `event_ids`.
+  - `task_result`: `TASK_COMPLETED`, `TASK_FAILED`, `TASK_PARTIALLY_COMPLETED` or `TASK_RESULT_UNKNOWN`, with a reason.
+  - `action_result_after_openshell`: for example `OPENSHELL_ALLOWED_ACTION_PROCEEDED` or `OPENSHELL_DENIED_ACTION_BLOCKED`, with a reason and supporting event ids.
+- `evaluation_metadata`: `action_policy_behavior` and `attribution_basis`. For evaluation only. Never a model input and never a label.
+- `execution_checks`: evidence collection, instruction compliance, tool execution status, evidence completeness, and whether the policy stayed unchanged.
+- `routing`: `output` (`accepted` for every record here), `training_eligible` and `reasons`.
+- `timestamps`: the times of conversation, task dispatch, tool call, result, final answer and evidence saving. Each has a `value` and the `source` it came from; `value` is `null` when it was not recorded (sandbox creation times are never recorded).
+- `identifiers`: `run_id`, `execution_id`, `conversation_id`, `sandbox_id`, `capture_id`.
+- `integrity`: `bundle_manifest_hash`, `raw_evidence_hash`, `record_hash` and `dropped_event_count`.
+
+Inputs and labels. The model input for the planned Safety Router is the tool call (`action_and_policy_events.agent_action`) together with `applied_policy`. The label is `outcomes.openshell_policy_decision.value`. Everything else is evidence or evaluation metadata and must not be given to the model.
+
+Read the label of every record:
+
+```bash
+node -e "for (const l of require('fs').readFileSync('accepted-execution-records.jsonl','utf8').split('\n').filter(Boolean)) { const r = JSON.parse(l); console.log(r.task.task_id, r.applied_policy.policy_profile, r.outcomes.openshell_policy_decision.value); }"
+```
 
 ## Limits
 
