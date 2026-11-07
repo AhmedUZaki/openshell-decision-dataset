@@ -1,0 +1,115 @@
+{
+  "schema": "single-action-policy-tests-manifest-2",
+  "record_type": "single_action_policy_test_record",
+  "active_records": {
+    "source_bundle_count": 61,
+    "accepted_count": 51,
+    "needs_review_count": 5,
+    "excluded_count": 5,
+    "training_eligible_count": 51,
+    "not_training_eligible_count": 10
+  },
+  "openshell_policy_decisions": {
+    "OPENSHELL_ALLOWED": 15,
+    "OPENSHELL_DENIED": 38,
+    "missing": 7,
+    "ambiguous": 1
+  },
+  "task_results": {
+    "TASK_COMPLETED": 13,
+    "TASK_FAILED": 45,
+    "TASK_PARTIALLY_COMPLETED": 0,
+    "TASK_RESULT_UNKNOWN": 3
+  },
+  "action_results_after_openshell": {
+    "OPENSHELL_ALLOWED_ACTION_PROCEEDED": 15,
+    "OPENSHELL_ALLOWED_ACTION_DID_NOT_PROCEED": 0,
+    "OPENSHELL_DENIED_ACTION_BLOCKED": 36,
+    "OPENSHELL_DENIED_ACTION_PROCEEDED": 0,
+    "OPENSHELL_ACTION_RESULT_NOT_CONFIRMED": 10
+  },
+  "training_eligible_binary_labels": {
+    "OPENSHELL_ALLOWED": 15,
+    "OPENSHELL_DENIED": 36
+  },
+  "active_policy_profiles": {
+    "balanced": 22,
+    "open": 19,
+    "restricted": 20
+  },
+  "active_task_ids": [
+    "fetch-clawhub-home",
+    "fetch-example-http",
+    "fetch-example-https",
+    "fetch-github-raw-file",
+    "fetch-httpbin-json",
+    "fetch-huggingface-resource",
+    "fetch-ip-address",
+    "fetch-litellm-prices",
+    "fetch-npm-package",
+    "fetch-openclaw-catalog",
+    "fetch-openclaw-documentation",
+    "fetch-openrouter-models",
+    "fetch-pypi-package",
+    "fetch-unusual-port",
+    "fetch-weather-api",
+    "fetch-wikipedia-article",
+    "fetch-wikipedia-summary",
+    "fetch-wttr-weather"
+  ],
+  "active_exclusion_reason_counts": {
+    "Bundle verification failed: raw evidence: no run or execution id": 2,
+    "N Tool Calls occurred; exactly one is allowed": 1,
+    "No Tool Call occurred": 1,
+    "No isolated Conversation is recorded": 2,
+    "No isolated Sandbox is recorded": 2,
+    "The Agent trajectory has N unreadable line(s), so the Tool Calls cannot be established": 3,
+    "The Bundle has no execution.json": 2,
+    "The evidence is Incomplete": 2,
+    "The log boundaries of the action were not recorded": 3
+  },
+  "model_and_component_versions": [
+    {
+      "model": "qwen2.5:1.5b",
+      "model_digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+      "versions": {
+        "openshell": "0.0.116",
+        "openclaw": "2026.9.2",
+        "nemoclaw": "0.0.140",
+        "ollama": "0.40.13"
+      },
+      "runtime_image_id": "sha256:23b806f148ba3e2c57b923f659fe2e6caa1dded684fc3ae410c41c2e17a73890"
+    }
+  ],
+  "project_identity": {
+    "schema_version": 1,
+    "git_commit": "a3e6668059eca476ec9261204d3984bf07a99086",
+    "git_dirty": false,
+    "source_manifest_hash": "01be43105839cfa47fc7ee18e219d8388308154653b027e486e7569405ac0b6a",
+    "source_manifest_files": 60,
+    "paths": "repository-relative"
+  },
+  "files": {
+    "accepted-execution-records.jsonl": {
+      "records": 51,
+      "bytes": 8675213,
+      "sha256": "98854b583565d82079247b6b97c9170e88cbdd0ae69d478fde195486d311a101"
+    },
+    "needs-review-records.jsonl": {
+      "records": 5,
+      "bytes": 851745,
+      "sha256": "a6b958eea409866e166463bf60aa0bfff2dca7467ff3e69ec07cb81b9f4db570"
+    },
+    "excluded-execution-index.jsonl": {
+      "records": 5,
+      "bytes": 3926,
+      "sha256": "384f412f865087b0b76391bee86ec519c39b25519c104e13616797337fb1a4c7"
+    }
+  },
+  "dataset_content_hash": "ac7625b8ca85e0c5098b74b8106681c37e75d075f5b3b7e8c33056fe8243d6e4",
+  "dataset_limitation": "The current weather pilot executions validate only the Data Collection Pipeline. They are not sufficient for training, benchmarking, or evaluating a Safety Router. This export holds 51 accepted record(s) from 61 source Bundle(s); 5 need review and 5 are excluded. It is not ready for training.",
+  "note": "Built only from saved Single-Action Policy Test Bundles. The OpenShell decision comes only from explicit OpenShell ALLOWED/DENIED events attributed to the single action; Task Result, Action Result After OpenShell, Agent behaviour and the decision evidence status are evaluation metadata, never a Router input or label. The export time is not stored anywhere: the output is a pure function of the Bundles, the schema and the source files. accepted-execution-records.jsonl is the authoritative accepted Dataset; it is not a model-specific fine-tuning format.",
+  "dataset_snapshot_id": "Safety Router Dataset 20261106T191411967Z",
+  "dataset_snapshot_directory": "safety-router-dataset-20261106T191411967Z",
+  "dataset_snapshot_created_utc": "2026-11-06T19:14:11.967Z"
+}
