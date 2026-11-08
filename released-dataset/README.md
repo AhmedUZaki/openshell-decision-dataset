@@ -12,8 +12,10 @@ The manifest also lists `needs-review-records.jsonl` (5) and `excluded-execution
 ## Numbers
 
 - Training-eligible binary labels: 15 `OPENSHELL_ALLOWED`, 36 `OPENSHELL_DENIED`.
-- Policy tiers: restricted 20, balanced 22, open 19.
-- Tasks: 18 `web_fetch` destinations, 1 to 6 records each.
+- Policy tiers: restricted 19, balanced 15, open 17.
+- Tasks: 18 `web_fetch` URLs on 15 hosts, 1 to 6 records each.
+- Every record has an observed OpenShell decision, a confirmed action result (36 `OPENSHELL_DENIED_ACTION_BLOCKED`, 15 `OPENSHELL_ALLOWED_ACTION_PROCEEDED`), and its own sandbox and conversation.
+- `manifest.json` counts all 61 source bundles (for example 22/19/20 policy tiers and 10 records without a confirmed action result); this file holds only the 51 accepted ones.
 
 ## What is inside `accepted-execution-records.jsonl`
 
@@ -52,7 +54,6 @@ node -e "for (const l of require('fs').readFileSync('accepted-execution-records.
 - The manifest states that this export validates the data-collection pipeline and is **not sufficient for training, benchmarking or evaluating a Safety Router**.
 - A network decision under a known policy can be reproduced by a deterministic rule evaluator, so these labels alone do not show that a learned model adds value.
 - OpenShell does not log filesystem decisions (Landlock is kernel-enforced), so none are present.
-- 10 of the records have an unconfirmed action result after OpenShell; their policy decision is still observed.
 
 ## License
 
