@@ -177,7 +177,7 @@ missing prerequisite instead of silently substituting another component.
 Double-click "Start OpenClaw Workspace.cmd" in the project folder.
 
 The launcher starts Docker Desktop if needed, checks Ubuntu Docker integration,
-starts the existing Ollama and managed gateway services, runs NemoClaw recovery
+starts the existing Ollama and managed gateway services, runs NemoClaw recovery,
 starts the current OpenShell panel service (the collector needs it), adds the
 OpenShell panel to the dashboard and opens the authenticated local OpenClaw
 dashboard in your browser. Chat there; the panel on the right shows the Agent's

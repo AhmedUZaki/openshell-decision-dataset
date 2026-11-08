@@ -32,4 +32,5 @@ Every Conversation runs under one of NemoClaw's own default tiers with no custom
 - `task-catalog/`: the task catalog ([task-catalog/README.md](task-catalog/README.md)).
 - `collect-data/`: `task-catalog.mjs`, `validate-task-catalog.mjs`, `collection-selection.mjs`, `collection-runner.mjs`, `menu.mjs`, `progress-display.mjs`, `system-adapter.mjs` (the code behind `Generate Dataset.cmd`).
 - `release-checks/`: `scan.mjs` and `scan-source.mjs`, the secret and path scan (`npm run scan:source`).
+
 Everything under `.local/` is private and ignored by Git.

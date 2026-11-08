@@ -13,7 +13,7 @@ The manifest also lists `needs-review-records.jsonl` (5) and `excluded-execution
 
 - Training-eligible binary labels: 15 `OPENSHELL_ALLOWED`, 36 `OPENSHELL_DENIED`.
 - Policy tiers: restricted 19, balanced 15, open 17.
-- Tasks: 18 `web_fetch` URLs on 15 hosts, 1 to 6 records each.
+- Tasks: 18 `web_fetch` URLs on 15 hosts, 1 to 6 records each. Twelve are in the current task catalog; six come from tests removed from it later (`fetch-example-http`, `fetch-httpbin-json`, `fetch-ip-address`, `fetch-openclaw-documentation`, `fetch-unusual-port`, `fetch-wikipedia-article`). Their records stay valid and in the dataset.
 - Every record has an observed OpenShell decision, a confirmed action result (36 `OPENSHELL_DENIED_ACTION_BLOCKED`, 15 `OPENSHELL_ALLOWED_ACTION_PROCEEDED`), and its own sandbox and conversation.
 - `manifest.json` counts all 61 source bundles (for example 22/19/20 policy tiers and 10 records without a confirmed action result); this file holds only the 51 accepted ones.
 
@@ -28,7 +28,7 @@ Top-level keys of every record:
 - `applied_policy`: `policy_profile` (`restricted`, `balanced` or `open`), `policy_snapshot` (the complete effective OpenShell policy: filesystem, Landlock and every network policy with its binaries, endpoints and rules), `policy_hash`, `policy_remained_unchanged`. Most of the file size is this snapshot.
 - `action_and_policy_events`: `agent_action` (the one tool call: `tool_call_id`, `tool_name`, `arguments.url`, request, start, finish and result times), `events_observed_during_action` (the OpenShell events inside the action window, for example `NET:OPEN` with `ALLOW` or `DENY`), `events_outside_action` (every other OpenShell event of that sandbox, such as setup), and `association_method`.
 - `agent_timeline`: the ordered Agent events (task received, tool call, tool result, final answer), each with `sequence`, `timestamp_utc`, `event_type` and `content`.
-- `openshell_timeline`: all OpenShell events of the sandbox in order (about 230 per record). Each has `sequence`, `timestamp_utc`, `raw_event_reference`, `event_type`, `decision`, `reason`, `matched_rule`, `event_origin` (`sandbox_setup_activity` or `agent_task_activity`), `destination`, `http_method` and `http_path`.
+- `openshell_timeline`: all OpenShell events of the sandbox in order (226 to 252 per record). Each has `sequence`, `timestamp_utc`, `raw_event_reference`, `event_type`, `decision`, `reason`, `matched_rule`, `event_origin` (`sandbox_setup_activity`, `agent_task_activity`, `platform_background_activity` or `unclassified_activity`), `destination`, `http_method` and `http_path`. Most events are sandbox setup activity.
 - `outcomes`: three independent results.
   - `openshell_policy_decision`: `value` (`OPENSHELL_ALLOWED` or `OPENSHELL_DENIED`) is the label. It also has `evidence_status`, `reason` (for a denial, for example that the endpoint is not allowed by any policy), `matched_rule` (the policy that allowed it) and `event_ids`.
   - `task_result`: `TASK_COMPLETED`, `TASK_FAILED`, `TASK_PARTIALLY_COMPLETED` or `TASK_RESULT_UNKNOWN`, with a reason.
@@ -57,4 +57,4 @@ node -e "for (const l of require('fs').readFileSync('accepted-execution-records.
 
 ## License
 
-Code and documentation in the parent repository are MIT licensed. The records in this folder are intended for [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Third-party software and model weights keep their own licenses. Confirm with all authors before publishing.
+Code and documentation in the parent repository are MIT licensed. The records in this folder are intended for [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Third-party software and model weights keep their own licenses. All authors must confirm these terms.

@@ -83,13 +83,13 @@ The Dataset records its own result names; see [safety-router-dataset.md](safety-
 
 ### After every execution succeeds
 
-The collector runs, each only if the one before passed:
+The collector runs one final step, `Creating Dataset`, which is the same command as `npm run create:dataset`:
 
 ```text
 node safety-router-dataset/create-dataset/export-single-action-policy-tests.mjs
-node safety-router-dataset/create-dataset/validate-single-action-policy-tests.mjs
-node safety-router-dataset/create-dataset/verify-single-action-policy-tests.mjs --determinism
 ```
+
+That one command builds the Dataset twice (the builds must be identical), validates it, verifies it independently and only then saves the timestamped folder. Nothing is saved if a check fails. `npm run validate:safety-router` and `npm run verify:safety-router` re-check the newest Dataset afterwards.
 
 It never exports after a failed or cancelled collection. The final report lists selected tests, policies, executions, Bundles, raw event totals, explicit decisions, the Safety Router counts (accepted, needs review, excluded, training-eligible; OpenShell decisions ALLOWED, DENIED, missing, ambiguous), duration, disk use and where everything is.
 

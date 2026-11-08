@@ -57,7 +57,7 @@
     },
     {
       "path": "safety-router-dataset/README.md",
-      "sha256": "5bb162ceb2753b7810f72a0b30f615dc3054402db1ab52b73682e71a2084da09"
+      "sha256": "d27579eff6e7548eff08cd6e09ccaa0c2a7884aa8470cab176939facf6e0ec5e"
     },
     {
       "path": "safety-router-dataset/collect-data/collection-runner.mjs",
