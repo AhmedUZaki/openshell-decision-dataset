@@ -23,8 +23,8 @@ export const PROTECTED_RULES = Object.freeze({
   directories: ['safety-router-dataset', 'setup', 'tools'],
   root_file_patterns: ['*.cmd'],
   root_files: ['package.json'],
-  extra_files: ['tests/run-tests.mjs'],
-  exclude_files: [MANIFEST_FILE],
+  extra_files: [],
+  exclude_files: [MANIFEST_FILE, 'Run Tests.cmd'],
   exclude_directories: ['.git', '.local', 'node_modules', '__pycache__'],
   exclude_extensions: ['.pyc', '.log'],
 });

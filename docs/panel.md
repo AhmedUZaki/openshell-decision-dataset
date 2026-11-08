@@ -63,12 +63,6 @@ Configuration records, SSH relays and dashboard loopback noise are excluded. Not
 - Common token/password patterns and URL queries/fragments are redacted from stored text. This is a conservative filter, not a complete sensitive-data detector.
 - The service source is hashed (`service-files.txt`); `Start OpenClaw Workspace.cmd` restarts a service whose build differs from the source on disk, and the collector's preflight checks that the running service has the expected build.
 
-### Check parser behavior
-
-```powershell
-node --test ".\tests\openshell-events.test.mjs" ".\tests\conversations.test.mjs" ".\tests\tool-calls.test.mjs" ".\tests\provenance.test.mjs"
-```
-
 ## Isolated Conversations and Evidence Bundles
 
 ### Workflow

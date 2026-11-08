@@ -8,7 +8,7 @@ How the environment is installed and rebuilt, how `Start OpenClaw Workspace.cmd`
 
 ### 1. Check prerequisites
 
-Needed on the Windows host: Windows 11 (x86-64, the only tested version), hardware virtualization enabled in the BIOS/UEFI, `winget` (Microsoft App Installer; the installer uses it for Docker Desktop and Node.js), an internet connection (the installer downloads Ubuntu, Docker images and the `qwen2.5:1.5b` model), and Administrator approval. Node.js 20 or newer on Windows runs the panel, the collector and the tests; `Install Everything.cmd` installs it with winget when missing (manually: `winget install OpenJS.NodeJS.LTS`, then open a new terminal and check `node --version`).
+Needed on the Windows host: Windows 11 (x86-64, the only tested version), hardware virtualization enabled in the BIOS/UEFI, `winget` (Microsoft App Installer; the installer uses it for Docker Desktop and Node.js), an internet connection (the installer downloads Ubuntu, Docker images and the `qwen2.5:1.5b` model), and Administrator approval. Node.js 20 or newer on Windows runs the panel and the collector; `Install Everything.cmd` installs it with winget when missing (manually: `winget install OpenJS.NodeJS.LTS`, then open a new terminal and check `node --version`).
 
 In Windows PowerShell:
 

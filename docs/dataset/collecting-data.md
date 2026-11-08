@@ -130,4 +130,4 @@ Everything under `.local/` is private and excluded from Git. **Never publish `.l
 - The 1.5B model `qwen2.5:1.5b` is unreliable at tool use: it often makes no call, repeats a call or uses another tool. Many executions will be excluded from training (and kept, with their reasons).
 - `openshell logs` is bounded to 100,000 lines; a capture that reaches the limit is Truncated and excluded.
 - Tests reach live public endpoints that can change.
-- The collector's interaction with a real Sandbox is tested only with mocks in the automated tests.
+- The collector's interaction with a real Sandbox is tested only with mocks, in the maintainer's local tests (not published).

@@ -13,11 +13,10 @@
     "root_files": [
       "package.json"
     ],
-    "extra_files": [
-      "tests/run-tests.mjs"
-    ],
+    "extra_files": [],
     "exclude_files": [
-      "setup/checksums.json"
+      "setup/checksums.json",
+      "Run Tests.cmd"
     ],
     "exclude_directories": [
       ".git",
@@ -40,10 +39,6 @@
       "sha256": "27ab593776ad6df64ce727ac34ebe34584935b94937df92a0768058f6380528c"
     },
     {
-      "path": "Run Tests.cmd",
-      "sha256": "a8b2fe48d352f9c55f157feb45993ba450873b3cc7017a4389f960a7bd8d7a46"
-    },
-    {
       "path": "Start OpenClaw Workspace.cmd",
       "sha256": "8fcf936ef26ba41865e5e54fc260884d80b74b080f995f5e904bc804608c5887"
     },
@@ -53,7 +48,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "a44c76f03a840aaaec4fe0f8865c490dc2f366bccffe4b26919b29ca4047131f"
+      "sha256": "5e74fb1218213e55adc331534faa265dfa91c5ad01ff1ab48b95a3e59a481f96"
     },
     {
       "path": "safety-router-dataset/README.md",
@@ -212,10 +207,6 @@
       "sha256": "9a2c985e54b1ccc711d974539aa310b725853ea555e3659b764f368de00f3ca1"
     },
     {
-      "path": "tests/run-tests.mjs",
-      "sha256": "68cb4d71a64e29463c7acd1e6f4883c3b30f7b55ef006d08909992928d061933"
-    },
-    {
       "path": "tools/events-panel/Enable-Panel.ps1",
       "sha256": "ca0eb56dfe90c277144040f497f6c8cd820ca3da3c5c0859616a22687801d4f5"
     },
@@ -269,7 +260,7 @@
     },
     {
       "path": "tools/events-panel/source-identity.mjs",
-      "sha256": "ae0121a7ed8045da4ffd2a1eec22fa0e5b7b96126784497c5a7e3a69766ddde7"
+      "sha256": "4e063020dbc0e40365d9e709de65dcc3f145c7d8e6c57a06396e8c124a9f5d84"
     },
     {
       "path": "tools/events-panel/tool-calls.mjs",

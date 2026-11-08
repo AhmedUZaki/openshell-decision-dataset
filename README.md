@@ -24,12 +24,11 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 
 ```text
 Install Everything.cmd   Start OpenClaw Workspace.cmd   Verify Installation.cmd   Generate Dataset.cmd
-Run Tests.cmd            package.json (npm test, validation scripts)
+package.json             validation and dataset scripts
 setup/     the environment: pins.env (every version in one file), installer, verifier, checksums.json, Generate-Dataset.ps1
 tools/     launchers/ (starts everything), events-panel/ (the OpenShell panel in the dashboard and its local service: conversation manager and evidence) and integrity-check/ (source checksums)
 safety-router-dataset/   source code and schemas only: task-catalog/ (the 12 Single-Action Policy Tests), collect-data/ (Generate Dataset.cmd), create-dataset/ (build, validate, verify, schemas), release-checks/ (secret and path scans)
 released-dataset/   the published snapshot: 51 accepted records, its manifest and a README (a reviewed export, never read by the tools)
-tests/     automated tests; run them with npm test or Run Tests.cmd
 docs/      documentation; docs/dataset/ is the methodology
 .local/    private runtime data (never committed): Captures, evidence, Runs and the Safety Router Dataset
 ```
@@ -54,7 +53,6 @@ Git holds the code, schemas, catalog, documentation and the reviewed export in `
 ## Test and check
 
 ```text
-npm test                      all automated tests (or double-click Run Tests.cmd)
 npm run validate:catalog      the active task catalog (12 Single-Action Policy Tests)
 npm run create:dataset  build, verify and save a new timestamped Dataset from the saved Bundles
 npm run validate:safety-router    validate it

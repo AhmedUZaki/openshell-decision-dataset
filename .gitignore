@@ -32,6 +32,10 @@ logs/
 *.gguf
 *.safetensors
 
+# Maintainer-only automated tests (kept on the owner's computer, not published)
+tests/
+Run Tests.cmd
+
 # Local editor and OS files
 .local/
 *-effective.json

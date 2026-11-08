@@ -5,7 +5,6 @@
   "description": "Reproducible NemoClaw/OpenClaw setup on Windows and the Safety Router dataset tooling. No runtime dependencies.",
   "engines": { "node": ">=20" },
   "scripts": {
-    "test": "node tests/run-tests.mjs",
     "validate:catalog": "node safety-router-dataset/collect-data/validate-task-catalog.mjs",
     "create:dataset": "node safety-router-dataset/create-dataset/export-single-action-policy-tests.mjs",
     "validate:safety-router": "node safety-router-dataset/create-dataset/validate-single-action-policy-tests.mjs",
