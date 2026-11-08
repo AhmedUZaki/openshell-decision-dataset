@@ -50,7 +50,7 @@ Several folders hold dataset-related files. **They are layers of one pipeline, n
 
 Git holds the code, schemas, catalog, documentation and the reviewed export in `released-dataset/`; the repository is public at https://github.com/AhmedUZaki/openshell-decision-dataset. Evidence, Bundles and the generated Datasets stay local. More: [docs/development.md](docs/development.md) (tracked versus local, new computer, tests, checksums).
 
-## Test and check
+## Checks
 
 ```text
 npm run validate:catalog      the active task catalog (12 Single-Action Policy Tests)
@@ -69,7 +69,7 @@ Sandboxes use NemoClaw's own default policy tiers with no hand-written rules: **
 
 - `setup/pins.env` is the single source for the model, Ollama, NemoClaw (with the exact commit and backport), OpenClaw and OpenShell versions, the sandbox name, port, context window and policy tier. The installer reads it and the verifier checks the installed versions against it.
 - Every saved bundle contains `environment.json`: the pins, the versions reported at save time, the Ollama model ID and the policy hash. A bundle can be traced to the environment that produced it.
-- `setup/checksums.json` registers every protected source file (setup, launchers, panel, collector, builder, schemas, task catalog, test launcher); `Verify Installation.cmd` reports modified, missing and unregistered ones.
+- `setup/checksums.json` registers every protected source file (setup, launchers, panel, collector, builder, schemas, task catalog); `Verify Installation.cmd` reports modified, missing and unregistered ones.
 - Newly saved bundles record the project source identity (Git commit and dirty flag when Git is available, otherwise `null`, plus a hash of the protected source files).
 - Tasks are JSON files in `safety-router-dataset/task-catalog/` that you can read and edit; a new valid file appears in the collector and the panel without changing any code (then run `--update-registry` and `npm run checksums:write`, see [task catalog](safety-router-dataset/task-catalog/README.md)). A task is natural-language input for the Agent, never a command and never an expected verdict, and it declares exactly one tool, one URL and one call. Collection is **autonomous**: every execution is one test under one policy in a new Conversation and Sandbox, so re-running a test reproduces the protocol, not the Agent's exact tool calls. The Dataset is rebuilt deterministically from the saved Bundles (`npm run verify:safety-router:determinism`). Association of events with the one action is by the isolated Sandbox plus saved log boundaries, not by a per-call id; `qwen2.5:1.5b` is unreliable at tool use, so many executions are excluded from training with their reasons. [Details](docs/dataset/collecting-data.md), [evidence layers](docs/dataset/evidence-layers.md).
 
@@ -79,7 +79,7 @@ Sandboxes use NemoClaw's own default policy tiers with no hand-written rules: **
 2. [Daily operation](docs/operations.md#daily-operation)
 3. [Troubleshooting](docs/operations.md#troubleshooting)
 4. [Files and backups](docs/operations.md#files-and-backups)
-5. [Security and GitHub publishing](docs/security-and-publishing.md) · [Project structure, tests and portability](docs/development.md) · [License](LICENSE)
+5. [Security and GitHub publishing](docs/security-and-publishing.md) · [Project structure, checks and portability](docs/development.md) · [License](LICENSE)
 6. [OpenShell panel](docs/panel.md#openshell-panel-in-the-dashboard) · [launcher](docs/setup.md#launcher) · [policies](docs/policies.md) · [compatibility backport](docs/setup.md#compatibility-backport)
 7. Dataset: [workflow](safety-router-dataset/README.md) · [collecting it (Generate Dataset.cmd)](docs/dataset/collecting-data.md) · [tasks](safety-router-dataset/task-catalog/README.md) · [evidence layers](docs/dataset/evidence-layers.md) · [the Safety Router dataset](docs/dataset/safety-router-dataset.md) · [record format](docs/dataset/safety-router-dataset.md#one-record)
 

@@ -18,7 +18,7 @@ Several folders hold dataset-related files. **They are not duplicate datasets:**
 
 | Kind | Examples | How to get it back |
 | --- | --- | --- |
-| **Tracked in Git** | installer and launchers, the panel and collector code, schemas, the task catalog, tests, documentation, `setup/checksums.json` | clone the repository |
+| **Tracked in Git** | installer and launchers, the panel and collector code, schemas, the task catalog, documentation, `setup/checksums.json` | clone the repository |
 | **Local only** | `.local/` (Bundles, evidence, runs, the Dataset), the panel's state and capability token, models, volumes | not in Git |
 | **Recreated from source** | the Ubuntu, Docker, Ollama, NemoClaw, OpenClaw and OpenShell installation (pinned in `setup/pins.env`); the Safety Router Dataset from saved evidence | `Install Everything.cmd`; `npm run create:dataset` |
 | **Needs a separate backup** | the evidence and Bundles themselves | a private backup of `.local/` |
@@ -47,7 +47,7 @@ The automated tests of this project are kept only on the maintainer's computer a
 
 ## Protected source files and `setup/checksums.json`
 
-Every file that defines the dataset or runs the setup is registered with a SHA-256 in `setup/checksums.json`: the setup scripts and `pins.env`, the root `.cmd` launchers and `package.json`, everything under `tools/`, `safety-router-dataset/` (collector, builder, schemas, the scans, the task catalog and every task file) and the test launcher. Generated data (`.local/`), secrets, evidence, Runs and Captures are never registered.
+Every file that defines the dataset or runs the setup is registered with a SHA-256 in `setup/checksums.json`: the setup scripts and `pins.env`, the root `.cmd` launchers and `package.json`, everything under `tools/`, `safety-router-dataset/` (collector, builder, schemas, the scans, the task catalog and every task file). Generated data (`.local/`), secrets, evidence, Runs and Captures are never registered.
 
 `Verify Installation.cmd` and `npm run checksums:check` report three different problems:
 
