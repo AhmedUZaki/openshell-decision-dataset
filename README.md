@@ -1,6 +1,8 @@
-# NemoClaw + OpenClaw on Windows with Local Ollama
+# OpenShell Decision Dataset
 
-An independent, reproducible setup for running OpenClaw in a NemoClaw-managed OpenShell sandbox on Windows (Ubuntu 24.04 on WSL 2, Docker Desktop, local Ollama), and for building a **Safety Router dataset**: real examples of what OpenShell decides. The one active experiment is the **Single-Action Policy Test**: the Agent is asked for exactly one tool action, once, against one destination, inside its own isolated Sandbox under one unchanged policy. The project stores the complete Agent timeline, the complete OpenShell timeline, the applied policy and the policy result taken only from OpenShell's own explicit `ALLOW`/`DENY` events.
+An independent, reproducible setup for running OpenClaw in a NemoClaw-managed OpenShell sandbox on Windows (Ubuntu 24.04 on WSL 2, Docker Desktop, local Ollama), and for building a **Safety Router dataset**: real examples of what OpenShell decides. The one active experiment is the **Single-Action Policy Test**: the Agent is asked for exactly one tool action, currently `web_fetch`, once, against one destination, inside its own isolated Sandbox under one unchanged policy. `web_fetch` is the single tool through which the Agent can issue exactly one network call to exactly one destination, which keeps each test's result attributable to that one action and one policy. The project stores the complete Agent timeline, the complete OpenShell timeline, the applied policy and the policy result taken only from OpenShell's own explicit `ALLOW`/`DENY` events, never from the Agent's self-reported outcome.
+
+This dataset also served as a preliminary validation of the evidence-collection and labeling pipeline later applied to the filesystem-policy red-team evaluation in [openshell-security-eval](https://github.com/AhmedUZaki/openshell-security-eval). Of 61 raw execution bundles collected, 51 were accepted as single-action `web_fetch` tests (15 `ALLOWED`, 36 `DENIED`); the remaining 10 were excluded or flagged for review (e.g. more than one tool call, no tool call at all, or incomplete isolated-session evidence).
 
 ```text
 Single-Action Policy Test -> one Agent tool call -> one destination -> one unchanged policy
@@ -11,12 +13,12 @@ It contains scripts, manifests, documentation and tooling only: no credentials, 
 
 ## Four steps
 
-| Step | Do this | Details |
-| --- | --- | --- |
-| 1. Install | Double-click `Install Everything.cmd` (it installs Ubuntu on WSL 2, Docker Desktop and Node.js with winget when missing, then the pinned stack), then `Verify Installation.cmd` | [Portable rebuild](docs/setup.md#portable-rebuild-and-private-backup) (automatic), [Installation](docs/setup.md#installation) (manual equivalent) |
-| 2. Try the Agent by hand | Double-click `Start OpenClaw Workspace.cmd` and chat in the dashboard. The **OpenShell** panel on the right shows each message, every tool call with its arguments and result, and the ALLOWED/DENIED decision OpenShell logged for it | [docs/panel.md](docs/panel.md#openshell-panel-in-the-dashboard) |
-| 3. Collect data | Double-click `Generate Dataset.cmd`, press 1 (Collect new data), then 1 in the collector menu: choose policies, tests and the number of independent executions, review the calculation, type `RUN`. It ends with export, validation and verification of the Safety Router Dataset | [docs/dataset/collecting-data.md](docs/dataset/collecting-data.md), [tasks](safety-router-dataset/task-catalog/README.md) |
-| 4. Create the Dataset | `Generate Dataset.cmd` option 2, Create Dataset (or `npm run create:dataset`): builds, validates, verifies independently and saves a NEW folder named with its UTC creation time under `.local/safety-router/datasets/` | [docs/dataset/safety-router-dataset.md](docs/dataset/safety-router-dataset.md) |
+| Step                     | Do this                                                                                                                                                                                                                                                                           | Details                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Install               | Double-click `Install Everything.cmd` (it installs Ubuntu on WSL 2, Docker Desktop and Node.js with winget when missing, then the pinned stack), then `Verify Installation.cmd`                                                                                                   | [Portable rebuild](docs/setup.md#portable-rebuild-and-private-backup) (automatic), [Installation](docs/setup.md#installation) (manual equivalent) |
+| 2. Try the Agent by hand | Double-click `Start OpenClaw Workspace.cmd` and chat in the dashboard. The **OpenShell** panel on the right shows each message, every tool call with its arguments and result, and the ALLOWED/DENIED decision OpenShell logged for it                                            | [docs/panel.md](docs/panel.md#openshell-panel-in-the-dashboard)                                                                                   |
+| 3. Collect data          | Double-click `Generate Dataset.cmd`, press 1 (Collect new data), then 1 in the collector menu: choose policies, tests and the number of independent executions, review the calculation, type `RUN`. It ends with export, validation and verification of the Safety Router Dataset | [docs/dataset/collecting-data.md](docs/dataset/collecting-data.md), [tasks](safety-router-dataset/task-catalog/README.md)                         |
+| 4. Create the Dataset    | `Generate Dataset.cmd` option 2, Create Dataset (or `npm run create:dataset`): builds, validates, verifies independently and saves a NEW folder named with its UTC creation time under `.local/safety-router/datasets/`                                                           | [docs/dataset/safety-router-dataset.md](docs/dataset/safety-router-dataset.md)                                                                    |
 
 > **License: MIT** (code and documentation). See [LICENSE](LICENSE). A released dataset needs its own terms.
 
@@ -37,16 +39,16 @@ docs/      documentation; docs/dataset/ is the methodology
 
 Several folders hold dataset-related files. **They are layers of one pipeline, not duplicate datasets.** Every Dataset is created in its own timestamped folder (`.local/safety-router/datasets/safety-router-dataset-<UTC timestamp>/`); its `accepted-execution-records.jsonl` is the authoritative accepted Dataset. It is the complete record of every accepted execution; it is not a model-specific fine-tuning format, and any trainer-specific conversion must be derived from it.
 
-| Folder | What it holds | In Git? |
-| --- | --- | --- |
-| `safety-router-dataset/` | Source code, schemas and the human-editable task catalog. No data. | Yes |
-| `.local/task-captures/` | One Bundle (Capture) per execution | No |
-| `.local/evidence/raw/` | Immutable original OpenShell evidence (never publish) | No |
-| `.local/evidence/sanitized/` | Derived, redacted evidence | No |
-| `.local/runs/` | Collection state, reports and per-execution log boundaries | No |
-| `.local/safety-router/datasets/` | One folder per created Dataset, named with its UTC creation time: `accepted-execution-records.jsonl`, `needs-review-records.jsonl`, `excluded-execution-index.jsonl`, `manifest.json` | No |
-| `docs/dataset/` | Methodology | Yes |
-| `released-dataset/` | A reviewed, public export of one Dataset (accepted records and manifest only). Not generated by the tools | Yes |
+| Folder                           | What it holds                                                                                                                                                                         | In Git? |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `safety-router-dataset/`         | Source code, schemas and the human-editable task catalog. No data.                                                                                                                    | Yes     |
+| `.local/task-captures/`          | One Bundle (Capture) per execution                                                                                                                                                    | No      |
+| `.local/evidence/raw/`           | Immutable original OpenShell evidence (never publish)                                                                                                                                 | No      |
+| `.local/evidence/sanitized/`     | Derived, redacted evidence                                                                                                                                                            | No      |
+| `.local/runs/`                   | Collection state, reports and per-execution log boundaries                                                                                                                            | No      |
+| `.local/safety-router/datasets/` | One folder per created Dataset, named with its UTC creation time: `accepted-execution-records.jsonl`, `needs-review-records.jsonl`, `excluded-execution-index.jsonl`, `manifest.json` | No      |
+| `docs/dataset/`                  | Methodology                                                                                                                                                                           | Yes     |
+| `released-dataset/`              | A reviewed, public export of one Dataset (accepted records and manifest only). Not generated by the tools                                                                             | Yes     |
 
 Git holds the code, schemas, catalog, documentation and the reviewed export in `released-dataset/`; the repository is public at https://github.com/AhmedUZaki/openshell-decision-dataset. Evidence, Bundles and the generated Datasets stay local. More: [docs/development.md](docs/development.md) (tracked versus local, new computer, tests, checksums).
 
@@ -61,6 +63,7 @@ npm run verify:safety-router:determinism   two builds must be identical
 npm run checksums:check       protected source files against setup/checksums.json
 npm run scan:source           secrets and user-specific paths in every file Git would include
 ```
+
 ## Policy
 
 Sandboxes use NemoClaw's own default policy tiers with no hand-written rules: **Balanced (default)** (the NemoClaw baseline plus `npm`, `pypi`, `huggingface`, `brew-balanced` and `brave`), and `restricted`/`open`, which you choose per collection. Details: [docs/policies.md](docs/policies.md), [collecting the dataset](docs/dataset/collecting-data.md).
@@ -85,18 +88,18 @@ Sandboxes use NemoClaw's own default policy tiers with no hand-written rules: **
 
 ## Validated configuration
 
-| Component | Configuration |
-| --- | --- |
-| Host | Windows 11, x86-64 |
-| Linux | Ubuntu 24.04 LTS on WSL 2 |
-| Containers | Docker Desktop with WSL integration |
-| Inference | Ollama inside Ubuntu |
-| Model | `qwen2.5:1.5b` (primary) |
-| Agent | OpenClaw |
-| Sandbox | `my-assistant` |
-| Policy | Balanced tier (`npm`, `pypi`, `huggingface`, `brew-balanced`, `brave`) on the NemoClaw baseline |
-| Hardware | RTX 3080 10 GB; 64 GB RAM; about 32 GB available to WSL |
-| Optional integrations | Web search and messaging disabled |
+| Component             | Configuration                                                                                   |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| Host                  | Windows 11, x86-64                                                                              |
+| Linux                 | Ubuntu 24.04 LTS on WSL 2                                                                       |
+| Containers            | Docker Desktop with WSL integration                                                             |
+| Inference             | Ollama inside Ubuntu                                                                            |
+| Model                 | `qwen2.5:1.5b` (primary)                                                                        |
+| Agent                 | OpenClaw                                                                                        |
+| Sandbox               | `my-assistant`                                                                                  |
+| Policy                | Balanced tier (`npm`, `pypi`, `huggingface`, `brew-balanced`, `brave`) on the NemoClaw baseline |
+| Hardware              | RTX 3080 10 GB; 64 GB RAM; about 32 GB available to WSL                                         |
+| Optional integrations | Web search and messaging disabled                                                               |
 
 This is a tested example, not a minimum specification. Model context and other applications affect GPU memory requirements. Ollama uses the host GPU; direct GPU access inside the agent sandbox was disabled.
 
